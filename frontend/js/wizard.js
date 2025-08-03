@@ -14,31 +14,31 @@ class OnboardingWizard {
             {
                 id: 'welcome',
                 title: 'Welcome',
-                description: 'Welcome to DeckStack - your shipping automation partner',
+                description: 'Welcome to DeckStack setup',
                 handler: this.handleWelcomeStep.bind(this)
             },
             {
-                id: 'overview',
-                title: 'How It Works',
-                description: 'Learn the DeckStack shipping workflow',
-                handler: this.handleOverviewStep.bind(this)
+                id: 'account',
+                title: 'Account Setup',
+                description: 'Create your DeckStack account',
+                handler: this.handleAccountStep.bind(this)
             },
             {
-                id: 'orders',
-                title: 'Managing Orders',
-                description: 'See how orders flow through the system',
-                handler: this.handleOrdersStep.bind(this)
+                id: 'integrations',
+                title: 'Store Integration',
+                description: 'Connect your e-commerce platform',
+                handler: this.handleIntegrationsStep.bind(this)
             },
             {
                 id: 'shipping',
-                title: 'Creating Labels',
-                description: 'Learn to create and print shipping labels',
+                title: 'Shipping Carriers',
+                description: 'Configure shipping providers',
                 handler: this.handleShippingStep.bind(this)
             },
             {
                 id: 'complete',
-                title: 'Ready to Ship!',
-                description: 'You\'re ready to use DeckStack',
+                title: 'Setup Complete',
+                description: 'Your account is ready to use',
                 handler: this.handleCompleteStep.bind(this)
             }
         ];
@@ -152,147 +152,185 @@ class OnboardingWizard {
             <div class="wizard-step active">
                 <div class="step-content">
                     <div class="welcome-hero">
-                        <div class="hero-icon">🃏</div>
-                        <h3>Welcome to DeckStack!</h3>
-                        <p class="hero-tagline">Stack the deck in your favor with automated shipping</p>
+                        <div class="hero-icon">
+                            <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                        </div>
+                        <h3>Welcome to DeckStack</h3>
+                        <p class="hero-tagline">Professional shipping automation for your business</p>
                     </div>
                     
                     <div class="welcome-intro">
-                        <p>Hi there! This quick tutorial will show you how DeckStack makes shipping trading cards fast, easy, and error-free. Perfect for card store employees who want to focus on customers, not paperwork.</p>
+                        <p>This setup wizard will guide you through configuring DeckStack for your business. We'll connect your store, set up shipping preferences, and get you ready to automate your fulfillment process.</p>
                     </div>
                     
                     <div class="welcome-features">
                         <div class="feature-grid">
                             <div class="feature-item">
-                                <i class="fas fa-mouse-pointer"></i>
-                                <h4>One-Click Labels</h4>
-                                <p>Create shipping labels instantly with a single click</p>
+                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.121 2.122"/>
+                                </svg>
+                                <h4>Automated Processing</h4>
+                                <p>Process orders automatically with intelligent routing</p>
                             </div>
                             <div class="feature-item">
-                                <i class="fas fa-shield-alt"></i>
-                                <h4>High-Value Safe</h4>
-                                <p>Special handling for expensive cards like Black Lotus</p>
+                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                                <h4>Secure & Reliable</h4>
+                                <p>Enterprise-grade security with 99.9% uptime</p>
                             </div>
                             <div class="feature-item">
-                                <i class="fas fa-print"></i>
-                                <h4>Print & Ship</h4>
-                                <p>Print labels and get tracking numbers automatically</p>
+                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                </svg>
+                                <h4>Multi-Carrier Support</h4>
+                                <p>Integrate with USPS, UPS, FedEx, and DHL</p>
                             </div>
                             <div class="feature-item">
-                                <i class="fas fa-chart-line"></i>
-                                <h4>Track Everything</h4>
-                                <p>Monitor all shipments in real-time</p>
+                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"/>
+                                </svg>
+                                <h4>Analytics & Insights</h4>
+                                <p>Track performance with detailed reporting</p>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="tutorial-time">
-                        <i class="fas fa-clock"></i>
-                        <span>Tutorial time: 3 minutes</span>
+                    <div class="setup-time">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Setup time: 5-10 minutes</span>
                     </div>
                 </div>
             </div>
         `;
     }
 
-    async handleOverviewStep() {
+    async handleAccountStep() {
         return `
             <div class="wizard-step active">
                 <div class="step-content">
-                    <h3>🚀 How DeckStack Works</h3>
-                    <p>DeckStack automates your entire shipping process. Here's how simple it is:</p>
+                    <h3>Create Your Account</h3>
+                    <p>Set up your DeckStack account to get started with automated shipping.</p>
                     
-                    <div class="workflow-steps">
-                        <div class="workflow-step">
-                            <div class="step-number">1</div>
-                            <div class="step-details">
-                                <h4>📦 Orders Come In</h4>
-                                <p>Customer orders appear automatically in your dashboard. No manual entry needed!</p>
-                            </div>
+                    <form id="account-form" class="setup-form">
+                        <div class="form-group">
+                            <label class="form-label" for="company-name">Company Name</label>
+                            <input type="text" id="company-name" class="form-input"
+                                   placeholder="Your Business Name" required>
                         </div>
                         
-                        <div class="workflow-step">
-                            <div class="step-number">2</div>
-                            <div class="step-details">
-                                <h4>🏷️ Create Labels</h4>
-                                <p>Click "Create Label" and DeckStack handles everything - addresses, postage, tracking numbers.</p>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label" for="admin-email">Admin Email</label>
+                            <input type="email" id="admin-email" class="form-input"
+                                   placeholder="admin@yourbusiness.com" required>
                         </div>
                         
-                        <div class="workflow-step">
-                            <div class="step-number">3</div>
-                            <div class="step-details">
-                                <h4>🖨️ Print & Ship</h4>
-                                <p>Print the label, stick it on the package, and drop it off. Customer gets tracking automatically!</p>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label" for="admin-password">Password</label>
+                            <input type="password" id="admin-password" class="form-input"
+                                   placeholder="Create a secure password" required>
                         </div>
-                    </div>
-                    
-                    <div class="workflow-benefits">
-                        <div class="benefit-highlight">
-                            <i class="fas fa-stopwatch"></i>
-                            <strong>Save 5+ minutes per order</strong> - No more manual address entry or postage calculations
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="business-type">Business Type</label>
+                            <select id="business-type" class="form-select" required>
+                                <option value="">Select your business type</option>
+                                <option value="ecommerce">E-commerce Store</option>
+                                <option value="retail">Retail Store</option>
+                                <option value="marketplace">Marketplace Seller</option>
+                                <option value="dropship">Dropshipping</option>
+                                <option value="other">Other</option>
+                            </select>
                         </div>
-                        <div class="benefit-highlight">
-                            <i class="fas fa-shield-check"></i>
-                            <strong>Zero shipping errors</strong> - Addresses and postage are always correct
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="monthly-volume">Monthly Shipping Volume</label>
+                            <select id="monthly-volume" class="form-select" required>
+                                <option value="">Select volume range</option>
+                                <option value="1-50">1-50 packages</option>
+                                <option value="51-200">51-200 packages</option>
+                                <option value="201-500">201-500 packages</option>
+                                <option value="501-1000">501-1000 packages</option>
+                                <option value="1000+">1000+ packages</option>
+                            </select>
                         </div>
-                        <div class="benefit-highlight">
-                            <i class="fas fa-smile"></i>
-                            <strong>Happy customers</strong> - Instant tracking and professional labels
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         `;
     }
 
-    async handleOrdersStep() {
+    async handleIntegrationsStep() {
         return `
             <div class="wizard-step active">
                 <div class="step-content">
-                    <h3>📋 Managing Your Orders</h3>
-                    <p>Let's look at how orders appear in DeckStack and what information you'll see:</p>
+                    <h3>Connect Your Store</h3>
+                    <p>Connect your e-commerce platform to automatically import orders and customer data.</p>
                     
-                    <div class="demo-order-card">
-                        <div class="order-header">
-                            <div class="order-id">#ORD-001</div>
-                            <div class="order-status pending">Ready to Ship</div>
-                        </div>
-                        <div class="order-details">
-                            <div class="customer-info">
-                                <h4>📍 Ship To:</h4>
-                                <p><strong>Jane Smith</strong><br>
-                                123 Main Street<br>
-                                New York, NY 10001</p>
+                    <div class="integration-options">
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <svg class="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                <h4>Shopify</h4>
                             </div>
-                            <div class="order-items">
-                                <h4>🃏 Items:</h4>
-                                <div class="item">
-                                    <span class="item-name">Black Lotus (Alpha)</span>
-                                    <span class="item-value">$27,009.95</span>
-                                </div>
-                                <div class="total">
-                                    <strong>Total: $27,009.95</strong>
-                                </div>
-                            </div>
+                            <p>Connect your Shopify store to automatically sync orders and customer information.</p>
+                            <button class="btn primary integration-btn" data-platform="shopify">
+                                Connect Shopify Store
+                            </button>
                         </div>
-                        <div class="order-actions">
-                            <button class="btn primary demo-btn">
-                                <i class="fas fa-shipping-fast"></i>
-                                Create Shipping Label
+                        
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <svg class="w-12 h-12 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                <h4>WooCommerce</h4>
+                            </div>
+                            <p>Integrate with your WordPress WooCommerce store for seamless order management.</p>
+                            <button class="btn secondary integration-btn" data-platform="woocommerce">
+                                Connect WooCommerce
+                            </button>
+                        </div>
+                        
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <svg class="w-12 h-12 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                <h4>BigCommerce</h4>
+                            </div>
+                            <p>Link your BigCommerce store to streamline your fulfillment process.</p>
+                            <button class="btn secondary integration-btn" data-platform="bigcommerce">
+                                Connect BigCommerce
+                            </button>
+                        </div>
+                        
+                        <div class="integration-card">
+                            <div class="integration-header">
+                                <svg class="w-12 h-12 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                <h4>Custom API</h4>
+                            </div>
+                            <p>Use our REST API to integrate with custom or other e-commerce platforms.</p>
+                            <button class="btn secondary integration-btn" data-platform="api">
+                                View API Documentation
                             </button>
                         </div>
                     </div>
                     
-                    <div class="order-tips">
-                        <h4>💡 What You'll Notice:</h4>
-                        <ul>
-                            <li><strong>High-Value Alert:</strong> Expensive cards (like this $27K Black Lotus) get special attention</li>
-                            <li><strong>Complete Info:</strong> Customer address and item details are already filled in</li>
-                            <li><strong>One-Click Action:</strong> Just click "Create Shipping Label" to start</li>
-                            <li><strong>Smart Defaults:</strong> DeckStack picks the best shipping method automatically</li>
-                        </ul>
+                    <div class="skip-option">
+                        <p class="text-center text-gray-600">
+                            <button class="btn-link" onclick="window.onboardingWizard.nextStep()">
+                                Skip for now - I'll set this up later
+                            </button>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -303,58 +341,107 @@ class OnboardingWizard {
         return `
             <div class="wizard-step active">
                 <div class="step-content">
-                    <h3>🏷️ Creating Shipping Labels</h3>
-                    <p>This is where the magic happens! Let's see what happens when you create a label:</p>
+                    <h3>Configure Shipping Carriers</h3>
+                    <p>Connect your shipping carrier accounts to enable label printing and tracking.</p>
                     
-                    <div class="shipping-demo">
-                        <div class="demo-step">
-                            <div class="step-icon">1️⃣</div>
-                            <div class="step-content">
-                                <h4>Click "Create Label"</h4>
-                                <p>DeckStack instantly calculates the best shipping method and cost</p>
+                    <div class="carrier-setup">
+                        <div class="carrier-card">
+                            <div class="carrier-header">
+                                <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                <h4>USPS</h4>
+                                <span class="recommended-badge">Recommended</span>
                             </div>
+                            <p>Connect your USPS account for domestic and international shipping.</p>
+                            <form class="carrier-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="usps-username">USPS Username</label>
+                                    <input type="text" id="usps-username" class="form-input" placeholder="Your USPS username">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="usps-password">USPS Password</label>
+                                    <input type="password" id="usps-password" class="form-input" placeholder="Your USPS password">
+                                </div>
+                                <button type="button" class="btn primary carrier-connect-btn" data-carrier="usps">
+                                    Connect USPS Account
+                                </button>
+                            </form>
                         </div>
                         
-                        <div class="demo-step">
-                            <div class="step-icon">2️⃣</div>
-                            <div class="step-content">
-                                <h4>Label Generated</h4>
-                                <p>Professional USPS label with tracking number: <code>9400517512016093</code></p>
+                        <div class="carrier-card">
+                            <div class="carrier-header">
+                                <svg class="w-8 h-8 text-brown-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                <h4>UPS</h4>
                             </div>
+                            <p>Integrate with UPS for reliable ground and express shipping options.</p>
+                            <form class="carrier-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="ups-account">UPS Account Number</label>
+                                    <input type="text" id="ups-account" class="form-input" placeholder="Your UPS account number">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="ups-api-key">UPS API Key</label>
+                                    <input type="text" id="ups-api-key" class="form-input" placeholder="Your UPS API key">
+                                </div>
+                                <button type="button" class="btn secondary carrier-connect-btn" data-carrier="ups">
+                                    Connect UPS Account
+                                </button>
+                            </form>
                         </div>
                         
-                        <div class="demo-step">
-                            <div class="step-icon">3️⃣</div>
-                            <div class="step-content">
-                                <h4>Ready to Print</h4>
-                                <p>Download PDF or send directly to your printer</p>
+                        <div class="carrier-card">
+                            <div class="carrier-header">
+                                <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                <h4>FedEx</h4>
+                            </div>
+                            <p>Connect FedEx for premium shipping services and overnight delivery.</p>
+                            <form class="carrier-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="fedex-account">FedEx Account Number</label>
+                                    <input type="text" id="fedex-account" class="form-input" placeholder="Your FedEx account number">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="fedex-meter">FedEx Meter Number</label>
+                                    <input type="text" id="fedex-meter" class="form-input" placeholder="Your FedEx meter number">
+                                </div>
+                                <button type="button" class="btn secondary carrier-connect-btn" data-carrier="fedex">
+                                    Connect FedEx Account
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="shipping-preferences">
+                        <h4>Shipping Preferences</h4>
+                        <div class="preferences-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="default-service">Default Service Level</label>
+                                <select id="default-service" class="form-select">
+                                    <option value="ground">Ground/Standard</option>
+                                    <option value="priority">Priority/Express</option>
+                                    <option value="overnight">Overnight/Next Day</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="insurance-threshold">Auto-Insurance Threshold</label>
+                                <input type="number" id="insurance-threshold" class="form-input"
+                                       placeholder="100" value="100">
+                                <div class="form-help">Orders above this value get automatic insurance</div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="shipping-features">
-                        <div class="feature-box">
-                            <i class="fas fa-magic"></i>
-                            <h4>Smart Shipping</h4>
-                            <p>Automatically selects Priority Mail for high-value items, First-Class for regular cards</p>
-                        </div>
-                        
-                        <div class="feature-box">
-                            <i class="fas fa-shield-alt"></i>
-                            <h4>Insurance Included</h4>
-                            <p>High-value orders get automatic insurance and signature confirmation</p>
-                        </div>
-                        
-                        <div class="feature-box">
-                            <i class="fas fa-mobile-alt"></i>
-                            <h4>Customer Updates</h4>
-                            <p>Customers get tracking info automatically - no extra work for you!</p>
-                        </div>
-                    </div>
-                    
-                    <div class="try-it-note">
-                        <i class="fas fa-lightbulb"></i>
-                        <strong>Ready to try it?</strong> After this tutorial, click "Shipping & Labels" to see the real system with sample orders!
+                    <div class="skip-option">
+                        <p class="text-center text-gray-600">
+                            <button class="btn-link" onclick="window.onboardingWizard.nextStep()">
+                                Skip carrier setup - I'll configure this later
+                            </button>
+                        </p>
                     </div>
                 </div>
             </div>

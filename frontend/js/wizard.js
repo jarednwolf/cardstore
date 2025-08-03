@@ -1,6 +1,6 @@
 /**
- * Onboarding Wizard Module
- * Handles the step-by-step setup process for CardStore Operations Layer
+ * DeckStack Onboarding Wizard
+ * Guides card store employees through the shipping workflow
  */
 
 class OnboardingWizard {
@@ -14,31 +14,31 @@ class OnboardingWizard {
             {
                 id: 'welcome',
                 title: 'Welcome',
-                description: 'Welcome to CardStore Operations Layer setup',
+                description: 'Welcome to DeckStack - your shipping automation partner',
                 handler: this.handleWelcomeStep.bind(this)
             },
             {
-                id: 'prerequisites',
-                title: 'Prerequisites',
-                description: 'Check system requirements',
-                handler: this.handlePrerequisitesStep.bind(this)
+                id: 'overview',
+                title: 'How It Works',
+                description: 'Learn the DeckStack shipping workflow',
+                handler: this.handleOverviewStep.bind(this)
             },
             {
-                id: 'environment',
-                title: 'Environment',
-                description: 'Configure environment settings',
-                handler: this.handleEnvironmentStep.bind(this)
+                id: 'orders',
+                title: 'Managing Orders',
+                description: 'See how orders flow through the system',
+                handler: this.handleOrdersStep.bind(this)
             },
             {
-                id: 'database',
-                title: 'Database',
-                description: 'Setup database and services',
-                handler: this.handleDatabaseStep.bind(this)
+                id: 'shipping',
+                title: 'Creating Labels',
+                description: 'Learn to create and print shipping labels',
+                handler: this.handleShippingStep.bind(this)
             },
             {
                 id: 'complete',
-                title: 'Complete',
-                description: 'Setup completed successfully',
+                title: 'Ready to Ship!',
+                description: 'You\'re ready to use DeckStack',
                 handler: this.handleCompleteStep.bind(this)
             }
         ];
@@ -106,7 +106,7 @@ class OnboardingWizard {
         prevBtn.disabled = this.currentStep === 0 || this.isProcessing;
         
         if (this.currentStep === this.totalSteps - 1) {
-            nextBtn.innerHTML = '<i class="fas fa-check"></i> Finish';
+            nextBtn.innerHTML = '<i class="fas fa-rocket"></i> Start Shipping!';
         } else {
             nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
         }
@@ -142,18 +142,8 @@ class OnboardingWizard {
     }
 
     async validateCurrentStep() {
-        const step = this.steps[this.currentStep];
-        
-        switch (step.id) {
-            case 'prerequisites':
-                return this.validatePrerequisites();
-            case 'environment':
-                return this.validateEnvironment();
-            case 'database':
-                return this.validateDatabase();
-            default:
-                return true;
-        }
+        // All tutorial steps are always valid - no technical validation needed
+        return true;
     }
 
     // Step Handlers
@@ -161,189 +151,214 @@ class OnboardingWizard {
         return `
             <div class="wizard-step active">
                 <div class="step-content">
-                    <h3>Welcome to CardStore Operations Layer</h3>
-                    <p>This setup wizard will guide you through configuring your CardStore Operations Layer for optimal performance. We'll check your system requirements, configure your environment, and set up all necessary services.</p>
+                    <div class="welcome-hero">
+                        <div class="hero-icon">🃏</div>
+                        <h3>Welcome to DeckStack!</h3>
+                        <p class="hero-tagline">Stack the deck in your favor with automated shipping</p>
+                    </div>
+                    
+                    <div class="welcome-intro">
+                        <p>Hi there! This quick tutorial will show you how DeckStack makes shipping trading cards fast, easy, and error-free. Perfect for card store employees who want to focus on customers, not paperwork.</p>
+                    </div>
                     
                     <div class="welcome-features">
                         <div class="feature-grid">
                             <div class="feature-item">
-                                <i class="fas fa-rocket"></i>
-                                <h4>Quick Setup</h4>
-                                <p>Automated configuration and dependency installation</p>
+                                <i class="fas fa-mouse-pointer"></i>
+                                <h4>One-Click Labels</h4>
+                                <p>Create shipping labels instantly with a single click</p>
                             </div>
                             <div class="feature-item">
                                 <i class="fas fa-shield-alt"></i>
-                                <h4>Secure Configuration</h4>
-                                <p>Best practices for security and performance</p>
+                                <h4>High-Value Safe</h4>
+                                <p>Special handling for expensive cards like Black Lotus</p>
                             </div>
                             <div class="feature-item">
-                                <i class="fas fa-cogs"></i>
-                                <h4>Service Management</h4>
-                                <p>Docker-based service orchestration</p>
+                                <i class="fas fa-print"></i>
+                                <h4>Print & Ship</h4>
+                                <p>Print labels and get tracking numbers automatically</p>
                             </div>
                             <div class="feature-item">
                                 <i class="fas fa-chart-line"></i>
-                                <h4>Monitoring Ready</h4>
-                                <p>Built-in health checks and monitoring</p>
+                                <h4>Track Everything</h4>
+                                <p>Monitor all shipments in real-time</p>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="setup-time">
+                    <div class="tutorial-time">
                         <i class="fas fa-clock"></i>
-                        <span>Estimated setup time: 5-10 minutes</span>
+                        <span>Tutorial time: 3 minutes</span>
                     </div>
                 </div>
             </div>
         `;
     }
 
-    async handlePrerequisitesStep() {
-        this.setProcessing(true);
-        
-        try {
-            const result = await window.api.safeRequest(() => window.api.checkPrerequisites());
-            
-            let prerequisitesHtml = '';
-            if (result.success) {
-                prerequisitesHtml = this.renderPrerequisites(result.data);
-            } else {
-                prerequisitesHtml = this.renderPrerequisitesError(result.error);
-            }
-            
-            return `
-                <div class="wizard-step active">
-                    <div class="step-content">
-                        <h3>System Prerequisites</h3>
-                        <p>We're checking if your system meets the requirements for running CardStore Operations Layer.</p>
-                        
-                        ${prerequisitesHtml}
-                        
-                        <div class="prerequisites-help">
-                            <h4>Need Help?</h4>
-                            <p>If any prerequisites are missing, please install them before continuing:</p>
-                            <ul>
-                                <li><strong>Node.js 18+:</strong> <a href="https://nodejs.org" target="_blank">Download from nodejs.org</a></li>
-                                <li><strong>Docker:</strong> <a href="https://docs.docker.com/get-docker/" target="_blank">Get Docker</a></li>
-                                <li><strong>Git:</strong> <a href="https://git-scm.com/downloads" target="_blank">Download Git</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } finally {
-            this.setProcessing(false);
-        }
-    }
-
-    async handleEnvironmentStep() {
+    async handleOverviewStep() {
         return `
             <div class="wizard-step active">
                 <div class="step-content">
-                    <h3>Environment Configuration</h3>
-                    <p>Configure your environment variables and application settings.</p>
+                    <h3>🚀 How DeckStack Works</h3>
+                    <p>DeckStack automates your entire shipping process. Here's how simple it is:</p>
                     
-                    <form id="environment-form" class="env-form">
-                        <div class="form-group">
-                            <label class="form-label">Database Configuration</label>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="use-docker" checked>
-                                <label for="use-docker">Use Docker for databases (Recommended)</label>
-                            </div>
-                            <div class="form-help">Docker will automatically set up PostgreSQL and Redis for you.</div>
-                        </div>
-                        
-                        <div id="manual-db-config" class="hidden">
-                            <div class="form-group">
-                                <label class="form-label" for="database-url">PostgreSQL Connection URL</label>
-                                <input type="text" id="database-url" class="form-input" 
-                                       placeholder="postgresql://user:password@localhost:5432/cardstore">
-                                <div class="form-help">Connection string for your PostgreSQL database</div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="redis-url">Redis Connection URL</label>
-                                <input type="text" id="redis-url" class="form-input" 
-                                       placeholder="redis://localhost:6379">
-                                <div class="form-help">Connection string for your Redis instance</div>
+                    <div class="workflow-steps">
+                        <div class="workflow-step">
+                            <div class="step-number">1</div>
+                            <div class="step-details">
+                                <h4>📦 Orders Come In</h4>
+                                <p>Customer orders appear automatically in your dashboard. No manual entry needed!</p>
                             </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label class="form-label" for="jwt-secret">JWT Secret</label>
-                            <input type="password" id="jwt-secret" class="form-input" 
-                                   placeholder="Leave empty to auto-generate">
-                            <div class="form-help">Secret key for JWT token signing (will be auto-generated if empty)</div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Shopify Integration (Optional)</label>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="configure-shopify">
-                                <label for="configure-shopify">Configure Shopify integration now</label>
+                        <div class="workflow-step">
+                            <div class="step-number">2</div>
+                            <div class="step-details">
+                                <h4>🏷️ Create Labels</h4>
+                                <p>Click "Create Label" and DeckStack handles everything - addresses, postage, tracking numbers.</p>
                             </div>
                         </div>
                         
-                        <div id="shopify-config" class="hidden">
-                            <div class="form-group">
-                                <label class="form-label" for="shopify-api-key">Shopify API Key</label>
-                                <input type="text" id="shopify-api-key" class="form-input">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="shopify-api-secret">Shopify API Secret</label>
-                                <input type="password" id="shopify-api-secret" class="form-input">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="shopify-webhook-secret">Shopify Webhook Secret</label>
-                                <input type="password" id="shopify-webhook-secret" class="form-input">
+                        <div class="workflow-step">
+                            <div class="step-number">3</div>
+                            <div class="step-details">
+                                <h4>🖨️ Print & Ship</h4>
+                                <p>Print the label, stick it on the package, and drop it off. Customer gets tracking automatically!</p>
                             </div>
                         </div>
-                    </form>
+                    </div>
+                    
+                    <div class="workflow-benefits">
+                        <div class="benefit-highlight">
+                            <i class="fas fa-stopwatch"></i>
+                            <strong>Save 5+ minutes per order</strong> - No more manual address entry or postage calculations
+                        </div>
+                        <div class="benefit-highlight">
+                            <i class="fas fa-shield-check"></i>
+                            <strong>Zero shipping errors</strong> - Addresses and postage are always correct
+                        </div>
+                        <div class="benefit-highlight">
+                            <i class="fas fa-smile"></i>
+                            <strong>Happy customers</strong> - Instant tracking and professional labels
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
     }
 
-    async handleDatabaseStep() {
-        this.setProcessing(true);
-        
-        try {
-            // Get environment configuration from previous step
-            const envConfig = this.getEnvironmentConfig();
-            
-            // Setup database
-            const result = await window.api.safeRequest(() => window.api.setupDatabase(envConfig));
-            
-            let statusHtml = '';
-            if (result.success) {
-                statusHtml = this.renderDatabaseSuccess(result.data);
-            } else {
-                statusHtml = this.renderDatabaseError(result.error);
-            }
-            
-            return `
-                <div class="wizard-step active">
-                    <div class="step-content">
-                        <h3>Database Setup</h3>
-                        <p>Setting up your database and running initial migrations.</p>
+    async handleOrdersStep() {
+        return `
+            <div class="wizard-step active">
+                <div class="step-content">
+                    <h3>📋 Managing Your Orders</h3>
+                    <p>Let's look at how orders appear in DeckStack and what information you'll see:</p>
+                    
+                    <div class="demo-order-card">
+                        <div class="order-header">
+                            <div class="order-id">#ORD-001</div>
+                            <div class="order-status pending">Ready to Ship</div>
+                        </div>
+                        <div class="order-details">
+                            <div class="customer-info">
+                                <h4>📍 Ship To:</h4>
+                                <p><strong>Jane Smith</strong><br>
+                                123 Main Street<br>
+                                New York, NY 10001</p>
+                            </div>
+                            <div class="order-items">
+                                <h4>🃏 Items:</h4>
+                                <div class="item">
+                                    <span class="item-name">Black Lotus (Alpha)</span>
+                                    <span class="item-value">$27,009.95</span>
+                                </div>
+                                <div class="total">
+                                    <strong>Total: $27,009.95</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="order-actions">
+                            <button class="btn primary demo-btn">
+                                <i class="fas fa-shipping-fast"></i>
+                                Create Shipping Label
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="order-tips">
+                        <h4>💡 What You'll Notice:</h4>
+                        <ul>
+                            <li><strong>High-Value Alert:</strong> Expensive cards (like this $27K Black Lotus) get special attention</li>
+                            <li><strong>Complete Info:</strong> Customer address and item details are already filled in</li>
+                            <li><strong>One-Click Action:</strong> Just click "Create Shipping Label" to start</li>
+                            <li><strong>Smart Defaults:</strong> DeckStack picks the best shipping method automatically</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    async handleShippingStep() {
+        return `
+            <div class="wizard-step active">
+                <div class="step-content">
+                    <h3>🏷️ Creating Shipping Labels</h3>
+                    <p>This is where the magic happens! Let's see what happens when you create a label:</p>
+                    
+                    <div class="shipping-demo">
+                        <div class="demo-step">
+                            <div class="step-icon">1️⃣</div>
+                            <div class="step-content">
+                                <h4>Click "Create Label"</h4>
+                                <p>DeckStack instantly calculates the best shipping method and cost</p>
+                            </div>
+                        </div>
                         
-                        ${statusHtml}
+                        <div class="demo-step">
+                            <div class="step-icon">2️⃣</div>
+                            <div class="step-content">
+                                <h4>Label Generated</h4>
+                                <p>Professional USPS label with tracking number: <code>9400517512016093</code></p>
+                            </div>
+                        </div>
                         
-                        <div class="setup-progress" id="setup-progress">
-                            <div class="progress-item">
-                                <i class="fas fa-database"></i>
-                                <span>Starting database services...</span>
-                                <div class="spinner"></div>
+                        <div class="demo-step">
+                            <div class="step-icon">3️⃣</div>
+                            <div class="step-content">
+                                <h4>Ready to Print</h4>
+                                <p>Download PDF or send directly to your printer</p>
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="shipping-features">
+                        <div class="feature-box">
+                            <i class="fas fa-magic"></i>
+                            <h4>Smart Shipping</h4>
+                            <p>Automatically selects Priority Mail for high-value items, First-Class for regular cards</p>
+                        </div>
+                        
+                        <div class="feature-box">
+                            <i class="fas fa-shield-alt"></i>
+                            <h4>Insurance Included</h4>
+                            <p>High-value orders get automatic insurance and signature confirmation</p>
+                        </div>
+                        
+                        <div class="feature-box">
+                            <i class="fas fa-mobile-alt"></i>
+                            <h4>Customer Updates</h4>
+                            <p>Customers get tracking info automatically - no extra work for you!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="try-it-note">
+                        <i class="fas fa-lightbulb"></i>
+                        <strong>Ready to try it?</strong> After this tutorial, click "Shipping & Labels" to see the real system with sample orders!
+                    </div>
                 </div>
-            `;
-        } finally {
-            this.setProcessing(false);
-        }
+            </div>
+        `;
     }
 
     async handleCompleteStep() {
@@ -352,45 +367,53 @@ class OnboardingWizard {
                 <div class="step-content">
                     <div class="completion-content">
                         <div class="success-icon">
-                            <i class="fas fa-check-circle"></i>
+                            🎉
                         </div>
                         
-                        <h3>Setup Complete!</h3>
-                        <p>Your CardStore Operations Layer is now ready to use. All services have been configured and are running.</p>
+                        <h3>You're Ready to Ship!</h3>
+                        <p>Congratulations! You now know how to use DeckStack to automate your card store shipping. You'll save time, reduce errors, and keep customers happy.</p>
+                        
+                        <div class="completion-summary">
+                            <h4>🃏 What You Learned:</h4>
+                            <ul>
+                                <li>✅ How orders flow through DeckStack automatically</li>
+                                <li>✅ One-click label creation saves 5+ minutes per order</li>
+                                <li>✅ High-value items get special protection automatically</li>
+                                <li>✅ Customers get tracking info without extra work</li>
+                            </ul>
+                        </div>
                         
                         <div class="next-steps">
-                            <h4>What's Next?</h4>
+                            <h4>🚀 Ready to Start Shipping?</h4>
                             <div class="next-step-grid">
+                                <div class="next-step-item primary">
+                                    <i class="fas fa-shipping-fast"></i>
+                                    <h5>Try Shipping Now</h5>
+                                    <p>Practice with real sample orders</p>
+                                    <button class="btn primary" onclick="window.open('shipping.html', '_blank')">
+                                        Start Shipping →
+                                    </button>
+                                </div>
+                                
                                 <div class="next-step-item">
                                     <i class="fas fa-tachometer-alt"></i>
                                     <h5>Dashboard</h5>
-                                    <p>Monitor your system status and health</p>
-                                    <button class="btn secondary" onclick="showView('dashboard')">Go to Dashboard</button>
+                                    <p>Monitor system status</p>
+                                    <button class="btn secondary" onclick="showView('dashboard')">View Dashboard</button>
                                 </div>
                                 
                                 <div class="next-step-item">
-                                    <i class="fas fa-heart-pulse"></i>
-                                    <h5>Health Check</h5>
-                                    <p>Run comprehensive system diagnostics</p>
-                                    <button class="btn secondary" onclick="showView('health')">Run Health Check</button>
-                                </div>
-                                
-                                <div class="next-step-item">
-                                    <i class="fas fa-cogs"></i>
-                                    <h5>Management</h5>
-                                    <p>Manage services and configuration</p>
-                                    <button class="btn secondary" onclick="showView('management')">System Management</button>
+                                    <i class="fas fa-question-circle"></i>
+                                    <h5>Need Help?</h5>
+                                    <p>Run this tutorial again anytime</p>
+                                    <button class="btn secondary" onclick="window.onboardingWizard.start()">Restart Tutorial</button>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="useful-links">
-                            <h4>Useful Links</h4>
-                            <ul>
-                                <li><a href="http://localhost:3000/health" target="_blank">Application Health Check</a></li>
-                                <li><a href="http://localhost:3001" target="_blank">Grafana Dashboard (admin/admin)</a></li>
-                                <li><a href="http://localhost:9090" target="_blank">Prometheus Metrics</a></li>
-                            </ul>
+                        <div class="success-message">
+                            <i class="fas fa-trophy"></i>
+                            <strong>Welcome to the DeckStack family!</strong> You're now equipped to handle shipping like a pro.
                         </div>
                     </div>
                 </div>
@@ -398,113 +421,7 @@ class OnboardingWizard {
         `;
     }
 
-    // Helper Methods
-    renderPrerequisites(data) {
-        if (!data || !data.checks) {
-            return '<div class="error-message">Unable to check prerequisites</div>';
-        }
-
-        let html = '<div class="prerequisite-list">';
-        
-        data.checks.forEach(check => {
-            const status = check.status === 'healthy' ? 'success' : 'error';
-            const icon = check.status === 'healthy' ? 'fa-check' : 'fa-times';
-            
-            html += `
-                <div class="prerequisite-item ${status}">
-                    <i class="fas ${icon} prerequisite-icon ${status}"></i>
-                    <div class="prerequisite-details">
-                        <div class="prerequisite-name">${check.name}</div>
-                        <div class="prerequisite-message">${check.message}</div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-        return html;
-    }
-
-    renderPrerequisitesError(error) {
-        return `
-            <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h4>Unable to Check Prerequisites</h4>
-                <p>${error}</p>
-                <p>Please ensure the backend server is running and try again.</p>
-            </div>
-        `;
-    }
-
-    renderDatabaseSuccess(data) {
-        return `
-            <div class="success-message">
-                <i class="fas fa-check-circle"></i>
-                <h4>Database Setup Complete</h4>
-                <p>All database services are running and migrations have been applied successfully.</p>
-            </div>
-        `;
-    }
-
-    renderDatabaseError(error) {
-        return `
-            <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h4>Database Setup Failed</h4>
-                <p>${error}</p>
-                <p>Please check your configuration and try again.</p>
-            </div>
-        `;
-    }
-
-    getEnvironmentConfig() {
-        const form = document.getElementById('environment-form');
-        if (!form) return {};
-
-        return {
-            useDocker: document.getElementById('use-docker')?.checked || false,
-            databaseUrl: document.getElementById('database-url')?.value || '',
-            redisUrl: document.getElementById('redis-url')?.value || '',
-            jwtSecret: document.getElementById('jwt-secret')?.value || '',
-            configureShopify: document.getElementById('configure-shopify')?.checked || false,
-            shopifyApiKey: document.getElementById('shopify-api-key')?.value || '',
-            shopifyApiSecret: document.getElementById('shopify-api-secret')?.value || '',
-            shopifyWebhookSecret: document.getElementById('shopify-webhook-secret')?.value || ''
-        };
-    }
-
-    validatePrerequisites() {
-        // Check if all required prerequisites are met
-        const prerequisites = document.querySelectorAll('.prerequisite-item.error');
-        if (prerequisites.length > 0) {
-            this.showError('Please resolve all prerequisite issues before continuing.');
-            return false;
-        }
-        return true;
-    }
-
-    validateEnvironment() {
-        const config = this.getEnvironmentConfig();
-        
-        if (!config.useDocker) {
-            if (!config.databaseUrl) {
-                this.showError('Please provide a PostgreSQL connection URL.');
-                return false;
-            }
-            if (!config.redisUrl) {
-                this.showError('Please provide a Redis connection URL.');
-                return false;
-            }
-        }
-        
-        this.stepData.environment = config;
-        return true;
-    }
-
-    validateDatabase() {
-        // Database validation is handled in the step handler
-        return true;
-    }
+    // Helper Methods - Simplified for tutorial mode
 
     setProcessing(processing) {
         this.isProcessing = processing;
@@ -524,20 +441,9 @@ class OnboardingWizard {
     }
 
     async finishWizard() {
-        this.setProcessing(true);
-        
-        try {
-            const result = await window.api.safeRequest(() => window.api.finalizeSetup());
-            
-            if (result.success) {
-                window.activityLogger.log('Onboarding completed successfully', 'success');
-                showView('dashboard');
-            } else {
-                this.showError('Failed to complete setup: ' + result.error);
-            }
-        } finally {
-            this.setProcessing(false);
-        }
+        // Tutorial completed - no technical setup needed
+        window.activityLogger.log('DeckStack tutorial completed successfully', 'success');
+        showView('dashboard');
     }
 
     updateActivityLog(activity) {
@@ -564,23 +470,6 @@ class OnboardingWizard {
 // Initialize wizard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.onboardingWizard = new OnboardingWizard();
-    
-    // Add event listeners for form interactions
-    document.addEventListener('change', (event) => {
-        if (event.target.id === 'use-docker') {
-            const manualConfig = document.getElementById('manual-db-config');
-            if (manualConfig) {
-                manualConfig.classList.toggle('hidden', event.target.checked);
-            }
-        }
-        
-        if (event.target.id === 'configure-shopify') {
-            const shopifyConfig = document.getElementById('shopify-config');
-            if (shopifyConfig) {
-                shopifyConfig.classList.toggle('hidden', !event.target.checked);
-            }
-        }
-    });
 });
 
 // Global functions for navigation

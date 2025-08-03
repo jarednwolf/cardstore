@@ -1,0 +1,305 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// TENANT & USER MANAGEMENT
+// =============================================================================
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  subdomain String   @unique
+  settings  String   @default("{}")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  products          Product[]
+  productVariants   ProductVariant[]
+  inventoryLocations InventoryLocation[]
+  inventoryItems    InventoryItem[]
+  orders            Order[]
+  stockMovements    StockMovement[]
+  users             User[]
+
+  @@map("tenants")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  email     String   @unique
+  name      String?
+  role      String   @default("staff") // owner, manager, staff, fulfillment
+  isActive  Boolean  @default(true) @map("is_active")
+  lastLoginAt DateTime? @map("last_login_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stockMovements StockMovement[]
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+// =============================================================================
+// PRODUCT CATALOG
+// =============================================================================
+
+model Product {
+  id                String   @id @default(cuid())
+  tenantId          String   @map("tenant_id")
+  shopifyProductId  String?  @unique @map("shopify_product_id")
+  title             String
+  description       String?
+  vendor            String?
+  productType       String?  @map("product_type")
+  category          String?
+  tags              String   @default("[]") // JSON array as string
+  status            String   @default("active")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variants ProductVariant[]
+
+  @@index([tenantId, status])
+  @@index([shopifyProductId])
+  @@map("products")
+}
+
+model ProductVariant {
+  id                String   @id @default(cuid())
+  tenantId          String   @map("tenant_id")
+  productId         String   @map("product_id")
+  shopifyVariantId  String?  @unique @map("shopify_variant_id")
+  sku               String   @unique
+  barcode           String?
+  title             String
+  price             Float
+  compareAtPrice    Float?   @map("compare_at_price")
+  weight            Float?
+  weightUnit        String   @default("g") @map("weight_unit")
+  requiresShipping  Boolean  @default(true) @map("requires_shipping")
+  taxable           Boolean  @default(true)
+  
+  // TCG-specific attributes stored as JSON
+  tcgAttributes     String   @default("{}") @map("tcg_attributes")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventoryItems  InventoryItem[]
+  orderLineItems  OrderLineItem[]
+  stockMovements  StockMovement[]
+  channelPrices   ChannelPrice[]
+
+  @@index([tenantId])
+  @@index([productId])
+  @@index([sku])
+  @@index([shopifyVariantId])
+  @@map("product_variants")
+}
+
+// =============================================================================
+// INVENTORY MANAGEMENT
+// =============================================================================
+
+model InventoryLocation {
+  id                String   @id @default(cuid())
+  tenantId          String   @map("tenant_id")
+  shopifyLocationId String?  @unique @map("shopify_location_id")
+  name              String
+  type              String   // warehouse, store, virtual
+  address           String   @default("{}") // JSON object as string
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relations
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventoryItems InventoryItem[]
+  stockMovements StockMovement[]
+
+  @@index([tenantId])
+  @@map("inventory_locations")
+}
+
+model InventoryItem {
+  id             String   @id @default(cuid())
+  tenantId       String   @map("tenant_id")
+  variantId      String   @map("variant_id")
+  locationId     String   @map("location_id")
+  onHand         Int      @default(0) @map("on_hand")
+  reserved       Int      @default(0)
+  safetyStock    Int      @default(0) @map("safety_stock")
+  channelBuffers String   @default("{}") @map("channel_buffers") // JSON object as string
+  lastCountedAt  DateTime? @map("last_counted_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variant  ProductVariant    @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  location InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, locationId])
+  @@index([tenantId])
+  @@map("inventory_items")
+}
+
+model StockMovement {
+  id         String   @id @default(cuid())
+  tenantId   String   @map("tenant_id")
+  variantId  String   @map("variant_id")
+  locationId String   @map("location_id")
+  type       String   // in, out, transfer
+  quantity   Int
+  reason     String   // sale, restock, adjustment, return, damage
+  reference  String?  // order ID, PO number, etc.
+  createdAt  DateTime @default(now()) @map("created_at")
+  createdBy  String   @map("created_by")
+
+  // Relations
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variant  ProductVariant    @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  location InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  user     User              @relation(fields: [createdBy], references: [id])
+
+  @@index([tenantId])
+  @@index([variantId, createdAt])
+  @@map("stock_movements")
+}
+
+// =============================================================================
+// ORDER MANAGEMENT
+// =============================================================================
+
+model Order {
+  id                String   @id @default(cuid())
+  tenantId          String   @map("tenant_id")
+  shopifyOrderId    String?  @unique @map("shopify_order_id")
+  externalOrderId   String?  @map("external_order_id")
+  orderNumber       String   @map("order_number")
+  source            String   // shopify, binderpos, tcgplayer, ebay, amazon
+  customerId        String?  @map("customer_id")
+  status            String   @default("pending")
+  financialStatus   String   @default("pending") @map("financial_status")
+  fulfillmentStatus String   @default("unfulfilled") @map("fulfillment_status")
+  
+  // Pricing
+  subtotalPrice     Float    @map("subtotal_price")
+  totalTax          Float    @default(0) @map("total_tax")
+  totalShipping     Float    @default(0) @map("total_shipping")
+  totalPrice        Float    @map("total_price")
+  currency          String   @default("USD")
+  
+  // Addresses stored as JSON
+  shippingAddress   String?  @map("shipping_address")
+  billingAddress    String?  @map("billing_address")
+  
+  // Metadata
+  tags              String   @default("[]") // JSON array as string
+  notes             String?
+  channelData       String   @default("{}") @map("channel_data") // JSON object as string
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  lineItems OrderLineItem[]
+
+  @@unique([tenantId, orderNumber])
+  @@index([tenantId, status])
+  @@index([source, createdAt])
+  @@index([shopifyOrderId])
+  @@index([externalOrderId])
+  @@map("orders")
+}
+
+model OrderLineItem {
+  id                String   @id @default(cuid())
+  orderId           String   @map("order_id")
+  variantId         String   @map("variant_id")
+  quantity          Int
+  price             Float
+  totalDiscount     Float    @default(0) @map("total_discount")
+  fulfilledQuantity Int      @default(0) @map("fulfilled_quantity")
+  
+  // Product snapshot at time of order
+  title             String
+  sku               String
+  variantTitle      String?  @map("variant_title")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relations
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@map("order_line_items")
+}
+
+// =============================================================================
+// PRICING & CHANNELS
+// =============================================================================
+
+model ChannelPrice {
+  id        String   @id @default(cuid())
+  variantId String   @map("variant_id")
+  channel   String   // shopify, ebay, amazon, tcgplayer
+  price     Float
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, channel])
+  @@index([channel])
+  @@map("channel_prices")
+}
+
+// =============================================================================
+// SYSTEM TABLES
+// =============================================================================
+
+model HealthCheck {
+  id        String   @id @default(cuid())
+  status    String
+  timestamp DateTime @default(now())
+  details   String   @default("{}")
+
+  @@map("health_checks")
+}
+
+model WebhookLog {
+  id        String   @id @default(cuid())
+  source    String   // shopify, ebay, tcgplayer
+  topic     String
+  payload   String   // JSON payload as string
+  processed Boolean  @default(false)
+  error     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([source, topic])
+  @@index([processed])
+  @@map("webhook_logs")
+}

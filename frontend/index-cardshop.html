@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardStore - Your Inventory & Sales Hub</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/cardshop.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-store"></i>
+                        <h1>CardStore</h1>
+                        <span class="tagline">Your Inventory & Sales Hub</span>
+                    </div>
+                    <div class="store-status" id="store-status">
+                        <div class="status-indicator">
+                            <i class="fas fa-circle"></i>
+                            <span>Store Online</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Welcome & Getting Started -->
+                <div id="welcome-view" class="view active">
+                    <div class="welcome-hero">
+                        <div class="hero-content">
+                            <h1>Welcome to Your Digital Card Shop!</h1>
+                            <p class="hero-subtitle">Manage your inventory, track sales, and grow your business - all in one place</p>
+                            
+                            <div class="value-props">
+                                <div class="value-prop">
+                                    <i class="fas fa-boxes"></i>
+                                    <h3>Track Every Card</h3>
+                                    <p>Never lose track of your inventory again</p>
+                                </div>
+                                <div class="value-prop">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h3>Boost Sales</h3>
+                                    <p>Sell on multiple platforms automatically</p>
+                                </div>
+                                <div class="value-prop">
+                                    <i class="fas fa-clock"></i>
+                                    <h3>Save Time</h3>
+                                    <p>Automate tedious inventory tasks</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Start Section -->
+                    <div class="quick-start-section">
+                        <h2>Let's Get Your Store Set Up!</h2>
+                        <p>Follow these simple steps to start managing your card inventory like a pro:</p>
+                        
+                        <div class="setup-steps">
+                            <div class="setup-step" data-step="1">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h3>Connect Your Store</h3>
+                                    <p>Link your existing online stores (Shopify, eBay, etc.) or start fresh</p>
+                                    <button class="btn primary" onclick="startSetup('connect')">
+                                        <i class="fas fa-link"></i>
+                                        Connect Store
+                                    </button>
+                                </div>
+                                <div class="step-status">
+                                    <i class="fas fa-circle-notch"></i>
+                                </div>
+                            </div>
+
+                            <div class="setup-step" data-step="2">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h3>Add Your First Cards</h3>
+                                    <p>Upload your inventory or scan cards to get started</p>
+                                    <button class="btn secondary" onclick="startSetup('inventory')" disabled>
+                                        <i class="fas fa-plus"></i>
+                                        Add Cards
+                                    </button>
+                                </div>
+                                <div class="step-status">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                            </div>
+
+                            <div class="setup-step" data-step="3">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h3>Start Selling</h3>
+                                    <p>Your cards will automatically appear on all connected platforms</p>
+                                    <button class="btn secondary" onclick="startSetup('selling')" disabled>
+                                        <i class="fas fa-rocket"></i>
+                                        Go Live
+                                    </button>
+                                </div>
+                                <div class="step-status">
+                                    <i class="fas fa-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="help-section">
+                            <div class="help-card">
+                                <i class="fas fa-question-circle"></i>
+                                <h4>Need Help Getting Started?</h4>
+                                <p>Watch our 5-minute setup video or chat with our support team</p>
+                                <div class="help-actions">
+                                    <button class="btn outline">
+                                        <i class="fas fa-play"></i>
+                                        Watch Video
+                                    </button>
+                                    <button class="btn outline">
+                                        <i class="fas fa-comments"></i>
+                                        Get Help
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Store Connection Setup -->
+                <div id="connect-view" class="view">
+                    <div class="setup-container">
+                        <div class="setup-header">
+                            <button class="back-btn" onclick="showView('welcome')">
+                                <i class="fas fa-arrow-left"></i>
+                                Back
+                            </button>
+                            <h2>Connect Your Store</h2>
+                            <p>Choose how you want to sell your cards</p>
+                        </div>
+
+                        <div class="connection-options">
+                            <div class="connection-option recommended">
+                                <div class="option-badge">Recommended</div>
+                                <div class="option-icon">
+                                    <i class="fab fa-shopify"></i>
+                                </div>
+                                <h3>I have a Shopify store</h3>
+                                <p>Connect your existing Shopify store to sync inventory automatically</p>
+                                <ul class="benefits">
+                                    <li><i class="fas fa-check"></i> Instant inventory sync</li>
+                                    <li><i class="fas fa-check"></i> Automatic order processing</li>
+                                    <li><i class="fas fa-check"></i> Real-time stock updates</li>
+                                </ul>
+                                <button class="btn primary" onclick="connectShopify()">
+                                    <i class="fas fa-link"></i>
+                                    Connect Shopify
+                                </button>
+                            </div>
+
+                            <div class="connection-option">
+                                <div class="option-icon">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <h3>I want to start fresh</h3>
+                                <p>We'll help you set up everything you need to start selling online</p>
+                                <ul class="benefits">
+                                    <li><i class="fas fa-check"></i> Free store setup</li>
+                                    <li><i class="fas fa-check"></i> Professional templates</li>
+                                    <li><i class="fas fa-check"></i> Payment processing</li>
+                                </ul>
+                                <button class="btn secondary" onclick="createNewStore()">
+                                    <i class="fas fa-plus"></i>
+                                    Create New Store
+                                </button>
+                            </div>
+
+                            <div class="connection-option">
+                                <div class="option-icon">
+                                    <i class="fas fa-boxes"></i>
+                                </div>
+                                <h3>I just want inventory tracking</h3>
+                                <p>Perfect for in-store sales and personal collection management</p>
+                                <ul class="benefits">
+                                    <li><i class="fas fa-check"></i> Track all your cards</li>
+                                    <li><i class="fas fa-check"></i> Price monitoring</li>
+                                    <li><i class="fas fa-check"></i> Sales analytics</li>
+                                </ul>
+                                <button class="btn secondary" onclick="setupInventoryOnly()">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    Inventory Only
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="setup-help">
+                            <div class="help-text">
+                                <i class="fas fa-lightbulb"></i>
+                                <strong>Not sure which option to choose?</strong> 
+                                Don't worry! You can always add more selling channels later.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopify Connection -->
+                <div id="shopify-connect-view" class="view">
+                    <div class="setup-container">
+                        <div class="setup-header">
+                            <button class="back-btn" onclick="showView('connect')">
+                                <i class="fas fa-arrow-left"></i>
+                                Back
+                            </button>
+                            <h2>Connect Your Shopify Store</h2>
+                            <p>We'll sync your inventory and orders automatically</p>
+                        </div>
+
+                        <div class="shopify-setup">
+                            <div class="setup-visual">
+                                <div class="connection-flow">
+                                    <div class="flow-step">
+                                        <i class="fab fa-shopify"></i>
+                                        <span>Your Shopify Store</span>
+                                    </div>
+                                    <div class="flow-arrow">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </div>
+                                    <div class="flow-step">
+                                        <i class="fas fa-sync"></i>
+                                        <span>CardStore Sync</span>
+                                    </div>
+                                    <div class="flow-arrow">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </div>
+                                    <div class="flow-step">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Automated Success</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="connection-form">
+                                <div class="form-group">
+                                    <label class="form-label">Your Shopify Store URL</label>
+                                    <div class="url-input">
+                                        <span class="url-prefix">https://</span>
+                                        <input type="text" id="shopify-url" class="form-input" placeholder="your-store-name">
+                                        <span class="url-suffix">.myshopify.com</span>
+                                    </div>
+                                    <div class="form-help">
+                                        <i class="fas fa-info-circle"></i>
+                                        Find this in your Shopify admin under "Online Store" → "Domains"
+                                    </div>
+                                </div>
+
+                                <div class="security-note">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <div>
+                                        <strong>Secure Connection</strong>
+                                        <p>We use Shopify's official API with read-only access to your inventory. Your store data stays safe.</p>
+                                    </div>
+                                </div>
+
+                                <button class="btn primary large" onclick="connectToShopify()">
+                                    <i class="fas fa-link"></i>
+                                    Connect to Shopify
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success View -->
+                <div id="success-view" class="view">
+                    <div class="success-container">
+                        <div class="success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h2>You're All Set!</h2>
+                        <p>Your store is connected and ready to go. Here's what happens next:</p>
+                        
+                        <div class="next-steps">
+                            <div class="next-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h3>We're importing your inventory</h3>
+                                    <p>This usually takes 2-5 minutes depending on how many products you have</p>
+                                </div>
+                            </div>
+                            
+                            <div class="next-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-sync"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h3>Setting up automatic sync</h3>
+                                    <p>Your inventory will stay updated across all platforms in real-time</p>
+                                </div>
+                            </div>
+                            
+                            <div class="next-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h3>You can start selling immediately</h3>
+                                    <p>Your existing store keeps working exactly as before, but now with superpowers!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="success-actions">
+                            <button class="btn primary large" onclick="goToDashboard()">
+                                <i class="fas fa-tachometer-alt"></i>
+                                View My Dashboard
+                            </button>
+                            <button class="btn outline" onclick="addMoreCards()">
+                                <i class="fas fa-plus"></i>
+                                Add More Cards
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-content">
+                <div class="spinner-large"></div>
+                <h3 id="loading-title">Connecting to your store...</h3>
+                <p id="loading-message">This may take a few moments while we set everything up.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/help-system.js"></script>
+    <script src="js/cardshop-app.js"></script>
+</body>
+</html>

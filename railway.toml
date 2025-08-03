@@ -1,0 +1,32 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm run build"
+
+[deploy]
+startCommand = "npm start"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[env]
+NODE_ENV = "production"
+PORT = "3000"
+
+[healthcheck]
+path = "/health"
+timeout = 30
+interval = 60
+
+[scaling]
+minReplicas = 1
+maxReplicas = 10
+
+[resources]
+memory = "1GB"
+cpu = "1vCPU"
+
+[networking]
+serviceDomains = ["cardstore-api"]
+
+[volumes]
+logs = "/app/logs"
+uploads = "/app/uploads"

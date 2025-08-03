@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardStore Operations Layer - Setup & Management</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-store"></i>
+                        <h1>CardStore Operations Layer</h1>
+                    </div>
+                    <nav class="nav">
+                        <button class="nav-btn active" data-view="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </button>
+                        <button class="nav-btn" data-view="onboarding">
+                            <i class="fas fa-rocket"></i>
+                            Setup Wizard
+                        </button>
+                        <button class="nav-btn" data-view="health">
+                            <i class="fas fa-heart-pulse"></i>
+                            Health Check
+                        </button>
+                        <button class="nav-btn" data-view="management">
+                            <i class="fas fa-cogs"></i>
+                            Management
+                        </button>
+                        <button class="nav-btn" onclick="window.open('shipping.html', '_blank')">
+                            <i class="fas fa-shipping-fast"></i>
+                            Shipping & Labels
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Dashboard View -->
+                <div id="dashboard-view" class="view active">
+                    <div class="welcome-section">
+                        <h2>Welcome to CardStore Operations Layer</h2>
+                        <p>Your comprehensive solution for multi-channel inventory and order management</p>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-card" id="system-status">
+                            <div class="status-header">
+                                <i class="fas fa-server"></i>
+                                <h3>System Status</h3>
+                            </div>
+                            <div class="status-content">
+                                <div class="status-indicator loading">
+                                    <span class="spinner"></span>
+                                    Checking...
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="status-card" id="services-status">
+                            <div class="status-header">
+                                <i class="fas fa-network-wired"></i>
+                                <h3>Services</h3>
+                            </div>
+                            <div class="status-content">
+                                <div class="service-list">
+                                    <div class="service-item">
+                                        <span>Application</span>
+                                        <span class="status-badge loading">Checking...</span>
+                                    </div>
+                                    <div class="service-item">
+                                        <span>Database</span>
+                                        <span class="status-badge loading">Checking...</span>
+                                    </div>
+                                    <div class="service-item">
+                                        <span>Redis</span>
+                                        <span class="status-badge loading">Checking...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="status-card" id="quick-actions">
+                            <div class="status-header">
+                                <i class="fas fa-bolt"></i>
+                                <h3>Quick Actions</h3>
+                            </div>
+                            <div class="status-content">
+                                <button class="action-btn primary" onclick="showView('onboarding')">
+                                    <i class="fas fa-rocket"></i>
+                                    Run Setup Wizard
+                                </button>
+                                <button class="action-btn secondary" onclick="runHealthCheck()">
+                                    <i class="fas fa-stethoscope"></i>
+                                    Health Check
+                                </button>
+                                <button class="action-btn secondary" onclick="showView('management')">
+                                    <i class="fas fa-cogs"></i>
+                                    System Management
+                                </button>
+                                <button class="action-btn primary" onclick="window.open('shipping.html', '_blank')">
+                                    <i class="fas fa-shipping-fast"></i>
+                                    Shipping & Labels
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="status-card" id="recent-activity">
+                            <div class="status-header">
+                                <i class="fas fa-clock"></i>
+                                <h3>Recent Activity</h3>
+                            </div>
+                            <div class="status-content">
+                                <div class="activity-list" id="activity-log">
+                                    <div class="activity-item">
+                                        <span class="activity-time">Just now</span>
+                                        <span class="activity-text">Dashboard loaded</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onboarding View -->
+                <div id="onboarding-view" class="view">
+                    <div class="wizard-container">
+                        <div class="wizard-header">
+                            <h2>Setup Wizard</h2>
+                            <p>Let's get your CardStore Operations Layer up and running!</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="wizard-progress"></div>
+                            </div>
+                            <div class="step-indicators" id="step-indicators">
+                                <div class="step active">1</div>
+                                <div class="step">2</div>
+                                <div class="step">3</div>
+                                <div class="step">4</div>
+                                <div class="step">5</div>
+                            </div>
+                        </div>
+
+                        <div class="wizard-content" id="wizard-content">
+                            <!-- Dynamic content will be loaded here -->
+                        </div>
+
+                        <div class="wizard-actions">
+                            <button class="btn secondary" id="prev-btn" onclick="previousStep()" disabled>
+                                <i class="fas fa-arrow-left"></i>
+                                Previous
+                            </button>
+                            <button class="btn primary" id="next-btn" onclick="nextStep()">
+                                Next
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Check View -->
+                <div id="health-view" class="view">
+                    <div class="health-container">
+                        <div class="health-header">
+                            <h2>System Health Check</h2>
+                            <p>Comprehensive diagnostics for your CardStore Operations Layer</p>
+                            <button class="btn primary" onclick="runHealthCheck()">
+                                <i class="fas fa-sync"></i>
+                                Run Health Check
+                            </button>
+                        </div>
+
+                        <div class="health-summary" id="health-summary">
+                            <div class="health-score">
+                                <div class="score-circle">
+                                    <span class="score-value" id="health-score">--</span>
+                                    <span class="score-label">Health Score</span>
+                                </div>
+                            </div>
+                            <div class="health-stats">
+                                <div class="stat">
+                                    <span class="stat-value" id="healthy-count">--</span>
+                                    <span class="stat-label">Healthy</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="warning-count">--</span>
+                                    <span class="stat-label">Warnings</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="error-count">--</span>
+                                    <span class="stat-label">Issues</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="health-categories" id="health-categories">
+                            <!-- Dynamic health check results will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Management View -->
+                <div id="management-view" class="view">
+                    <div class="management-container">
+                        <div class="management-header">
+                            <h2>System Management</h2>
+                            <p>Manage your CardStore Operations Layer services and configuration</p>
+                        </div>
+
+                        <div class="management-grid">
+                            <div class="management-card">
+                                <div class="card-header">
+                                    <i class="fas fa-database"></i>
+                                    <h3>Database Management</h3>
+                                </div>
+                                <div class="card-content">
+                                    <p>Manage database migrations, seeding, and monitoring</p>
+                                    <div class="action-buttons">
+                                        <button class="btn secondary" onclick="runDatabaseMigration()">
+                                            <i class="fas fa-sync"></i>
+                                            Run Migrations
+                                        </button>
+                                        <button class="btn secondary" onclick="openPrismaStudio()">
+                                            <i class="fas fa-eye"></i>
+                                            Prisma Studio
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="management-card">
+                                <div class="card-header">
+                                    <i class="fas fa-cog"></i>
+                                    <h3>Environment Configuration</h3>
+                                </div>
+                                <div class="card-content">
+                                    <p>View and manage environment variables</p>
+                                    <div class="action-buttons">
+                                        <button class="btn secondary" onclick="showEnvironmentConfig()">
+                                            <i class="fas fa-edit"></i>
+                                            Edit Configuration
+                                        </button>
+                                        <button class="btn secondary" onclick="validateEnvironment()">
+                                            <i class="fas fa-check"></i>
+                                            Validate Config
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="management-card">
+                                <div class="card-header">
+                                    <i class="fas fa-docker"></i>
+                                    <h3>Docker Services</h3>
+                                </div>
+                                <div class="card-content">
+                                    <p>Manage Docker containers and services</p>
+                                    <div class="action-buttons">
+                                        <button class="btn success" onclick="startServices()">
+                                            <i class="fas fa-play"></i>
+                                            Start Services
+                                        </button>
+                                        <button class="btn danger" onclick="stopServices()">
+                                            <i class="fas fa-stop"></i>
+                                            Stop Services
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="management-card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h3>Monitoring & Logs</h3>
+                                </div>
+                                <div class="card-content">
+                                    <p>Access monitoring dashboards and system logs</p>
+                                    <div class="action-buttons">
+                                        <button class="btn secondary" onclick="openGrafana()">
+                                            <i class="fas fa-chart-bar"></i>
+                                            Grafana Dashboard
+                                        </button>
+                                        <button class="btn secondary" onclick="viewLogs()">
+                                            <i class="fas fa-file-alt"></i>
+                                            View Logs
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-content">
+                <div class="spinner-large"></div>
+                <h3 id="loading-title">Processing...</h3>
+                <p id="loading-message">Please wait while we complete the operation.</p>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Modal Title</h3>
+                    <button class="modal-close" onclick="closeModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Dynamic content -->
+                </div>
+                <div class="modal-footer" id="modal-footer">
+                    <button class="btn secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn primary" id="modal-confirm">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/wizard.js"></script>
+    <script src="js/health.js"></script>
+    <script src="js/management.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

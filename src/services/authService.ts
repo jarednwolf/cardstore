@@ -244,14 +244,13 @@ export class AuthService {
       return {
         id: data.id,
         email: data.email,
-        roles: data.user_roles?.map((ur: any) => ({
-          id: ur.tenant_id,
-          name: ur.role,
-          permissions: ur.permissions || []
-        })) || [],
+        name: data.full_name || data.email,
+        role: data.user_roles?.[0]?.role || 'staff',
         tenantId: data.tenant_id,
         lastLoginAt: data.last_login_at ? new Date(data.last_login_at) : new Date(),
-        isActive: data.is_active
+        isActive: data.is_active,
+        createdAt: data.created_at ? new Date(data.created_at) : new Date(),
+        updatedAt: data.updated_at ? new Date(data.updated_at) : new Date()
       };
 
     } catch (error) {

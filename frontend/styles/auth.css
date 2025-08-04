@@ -72,6 +72,15 @@
     color: white;
 }
 
+/* Above the fold section */
+.hero-above-fold {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 2rem;
+}
+
 .hero-content h2 {
     font-size: 3rem;
     font-weight: 700;
@@ -81,7 +90,7 @@
 
 .hero-description {
     font-size: 1.25rem;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
     opacity: 0.9;
     max-width: 600px;
     margin-left: auto;
@@ -89,12 +98,105 @@
     line-height: 1.6;
 }
 
+/* Primary CTA Section */
+.primary-cta-section {
+    margin-bottom: 2rem;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.cta-buttons.primary-cta {
+    margin-bottom: 1.5rem;
+}
+
+.cta-buttons.secondary-cta {
+    margin-bottom: 2rem;
+}
+
+.btn.large {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    min-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.btn.cta-primary {
+    min-width: 220px;
+    padding: 1.25rem 2.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    transform: translateY(0);
+}
+
+.btn.cta-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+}
+
+.btn.cta-secondary {
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.btn.cta-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 1);
+}
+
+/* Compact trust indicators for above fold */
+.trust-indicators-compact {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    opacity: 0.8;
+    font-size: 0.8rem;
+}
+
+.trust-indicators-compact .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.trust-indicators-compact .trust-item i {
+    font-size: 0.9rem;
+}
+
+/* Below the fold section */
+.hero-below-fold {
+    padding-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Features Section */
+.features-section {
+    margin-bottom: 4rem;
+}
+
+.features-headline {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 3rem;
+    color: white;
+    opacity: 0.95;
+}
+
 .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
-    margin-bottom: 3rem;
-    max-width: 800px;
+    margin-bottom: 2rem;
+    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -120,7 +222,7 @@
     color: #ffffff;
 }
 
-.feature-card h3 {
+.feature-card h4 {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
@@ -132,19 +234,10 @@
     line-height: 1.5;
 }
 
-.cta-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 3rem;
-    flex-wrap: wrap;
-}
-
-.btn.large {
-    padding: 1rem 2rem;
-    font-size: 1.125rem;
-    font-weight: 600;
-    min-width: 200px;
+/* Secondary CTA Section */
+.secondary-cta-section {
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .trust-indicators {
@@ -411,6 +504,17 @@
     
     .hero-description {
         font-size: 1.125rem;
+        margin-bottom: 2rem;
+    }
+    
+    .hero-above-fold {
+        min-height: 50vh;
+        padding-bottom: 1.5rem;
+    }
+    
+    .features-headline {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
     }
     
     .features-grid {
@@ -431,9 +535,36 @@
         min-width: 250px;
     }
     
+    .btn.cta-primary {
+        min-width: 280px;
+        padding: 1rem 2rem;
+        font-size: 1.125rem;
+    }
+    
     .trust-indicators {
         flex-direction: column;
         gap: 1rem;
+    }
+    
+    .trust-indicators-compact {
+        gap: 1rem;
+        font-size: 0.75rem;
+    }
+    
+    .trust-indicators-compact .trust-item {
+        gap: 0.3rem;
+    }
+    
+    .hero-below-fold {
+        padding-top: 2rem;
+    }
+    
+    .features-section {
+        margin-bottom: 3rem;
+    }
+    
+    .secondary-cta-section {
+        padding-top: 1.5rem;
     }
     
     .auth-form-container {
@@ -464,17 +595,43 @@
         padding: 1rem;
     }
     
-    .auth-form-container {
-        padding: 1.5rem;
+    .hero-above-fold {
+        min-height: 45vh;
+        padding-bottom: 1rem;
     }
     
     .hero-content h2 {
         font-size: 1.75rem;
     }
     
+    .hero-description {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .features-headline {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
     .btn.large {
         min-width: 200px;
         padding: 0.875rem 1.5rem;
+    }
+    
+    .btn.cta-primary {
+        min-width: 240px;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .trust-indicators-compact {
+        font-size: 0.7rem;
+        gap: 0.75rem;
+    }
+    
+    .auth-form-container {
+        padding: 1.5rem;
     }
 }
 

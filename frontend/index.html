@@ -151,7 +151,7 @@
         
         /* Hero Section */
         .hero-section {
-            padding: var(--space-20) 0 var(--space-16);
+            padding: calc(var(--space-20) + 60px) 0 var(--space-16);
             background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
             position: relative;
             overflow: hidden;
@@ -669,82 +669,152 @@
         
         /* Architecture Diagram Styles */
         .architecture-modal .modal-content {
-            max-width: 900px;
+            max-width: 1000px;
         }
         
         .architecture-diagram {
             display: flex;
             flex-direction: column;
-            gap: var(--space-6);
+            gap: var(--space-8);
             margin: var(--space-4) 0;
         }
         
-        .diagram-layer {
+        .diagram-step {
             display: flex;
-            justify-content: center;
-            gap: var(--space-4);
-            flex-wrap: wrap;
-        }
-        
-        .diagram-box {
-            background: var(--primary-50);
-            border: 2px solid var(--primary-200);
-            border-radius: 0.75rem;
+            align-items: center;
+            gap: var(--space-6);
             padding: var(--space-4);
-            text-align: center;
-            min-width: 140px;
-            position: relative;
+            border-radius: 1rem;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
             transition: all 0.3s ease;
         }
         
-        .diagram-box:hover {
-            background: var(--primary-100);
-            border-color: var(--primary-300);
+        .diagram-step:hover {
+            background: var(--primary-50);
+            border-color: var(--primary-200);
             transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
         
-        .diagram-box.highlight {
+        .step-number {
             background: var(--primary-600);
             color: white;
-            border-color: var(--primary-700);
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            flex-shrink: 0;
         }
         
-        .diagram-box h4 {
-            margin: 0 0 var(--space-2) 0;
-            font-size: 0.875rem;
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-size: 1.25rem;
             font-weight: 600;
+            color: var(--gray-900);
+            margin: 0 0 var(--space-2) 0;
         }
         
-        .diagram-box p {
+        .step-description {
+            color: var(--gray-600);
+            line-height: 1.6;
             margin: 0;
+        }
+        
+        .step-components {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+            margin-top: var(--space-3);
+        }
+        
+        .component-tag {
+            background: var(--primary-100);
+            color: var(--primary-700);
+            padding: var(--space-1) var(--space-3);
+            border-radius: 1rem;
             font-size: 0.75rem;
-            opacity: 0.8;
+            font-weight: 500;
+            border: 1px solid var(--primary-200);
         }
         
         .diagram-arrow {
             display: flex;
             justify-content: center;
             color: var(--primary-500);
-            font-size: 1.5rem;
+            font-size: 2rem;
+            margin: var(--space-2) 0;
         }
         
-        .flow-description {
-            background: var(--gray-50);
-            padding: var(--space-4);
-            border-radius: 0.5rem;
-            margin-top: var(--space-4);
+        .flow-summary {
+            background: linear-gradient(135deg, var(--primary-50), var(--accent-50));
+            padding: var(--space-6);
+            border-radius: 1rem;
+            margin-top: var(--space-6);
+            border: 1px solid var(--primary-200);
         }
         
-        .flow-description h4 {
-            margin: 0 0 var(--space-2) 0;
+        .flow-summary h4 {
+            margin: 0 0 var(--space-3) 0;
             color: var(--gray-900);
+            font-size: 1.25rem;
+            font-weight: 600;
         }
         
-        .flow-description p {
+        .flow-summary p {
             margin: 0;
-            color: var(--gray-600);
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+        
+        /* Form validation styles */
+        .form-group.error input {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        
+        .error-message {
+            color: #ef4444;
             font-size: 0.875rem;
-            line-height: 1.5;
+            margin-top: var(--space-1);
+            display: none;
+        }
+        
+        .form-group.error .error-message {
+            display: block;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: var(--space-3);
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .diagram-step {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--space-4);
+            }
+            
+            .step-components {
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -961,21 +1031,37 @@
             </div>
             <div class="modal-body">
                 <form id="signupForm">
-                    <div class="form-group">
-                        <label for="signupName">Full Name</label>
-                        <input type="text" id="signupName" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="signupFirstName">First Name</label>
+                            <input type="text" id="signupFirstName" required>
+                            <div class="error-message">First name is required</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="signupLastName">Last Name</label>
+                            <input type="text" id="signupLastName" required>
+                            <div class="error-message">Last name is required</div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="signupEmail">Email</label>
                         <input type="email" id="signupEmail" required>
+                        <div class="error-message">Please enter a valid email address</div>
                     </div>
                     <div class="form-group">
                         <label for="signupCompany">Company Name</label>
                         <input type="text" id="signupCompany" required>
+                        <div class="error-message">Company name is required</div>
                     </div>
                     <div class="form-group">
                         <label for="signupPassword">Password</label>
-                        <input type="password" id="signupPassword" required>
+                        <input type="password" id="signupPassword" required minlength="8">
+                        <div class="error-message">Password must be at least 8 characters long</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPasswordConfirm">Confirm Password</label>
+                        <input type="password" id="signupPasswordConfirm" required>
+                        <div class="error-message">Passwords do not match</div>
                     </div>
                 </form>
             </div>
@@ -990,32 +1076,25 @@
     <div id="architectureModal" class="modal architecture-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>DeckStack Architecture Flow</h3>
+                <h3>How DeckStack Works</h3>
                 <button class="modal-close" onclick="closeModal('architectureModal')">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="architecture-diagram">
-                    <!-- User Layer -->
-                    <div class="diagram-layer">
-                        <div class="diagram-box highlight">
-                            <h4>E-commerce Store</h4>
-                            <p>Your online store</p>
-                        </div>
-                        <div class="diagram-box highlight">
-                            <h4>Admin Dashboard</h4>
-                            <p>Management interface</p>
-                        </div>
-                    </div>
-                    
-                    <div class="diagram-arrow">
-                        <i class="fas fa-arrow-down"></i>
-                    </div>
-                    
-                    <!-- API Layer -->
-                    <div class="diagram-layer">
-                        <div class="diagram-box">
-                            <h4>DeckStack API</h4>
-                            <p>Multi-tenant REST API</p>
+                    <!-- Step 1: Order Intake -->
+                    <div class="diagram-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4 class="step-title">Order Intake & Integration</h4>
+                            <p class="step-description">
+                                Your e-commerce store or admin dashboard sends order data to DeckStack through our secure REST API.
+                                We support real-time integration with popular platforms and custom implementations.
+                            </p>
+                            <div class="step-components">
+                                <span class="component-tag">E-commerce Store</span>
+                                <span class="component-tag">Admin Dashboard</span>
+                                <span class="component-tag">REST API</span>
+                            </div>
                         </div>
                     </div>
                     
@@ -1023,43 +1102,21 @@
                         <i class="fas fa-arrow-down"></i>
                     </div>
                     
-                    <!-- Processing Layer -->
-                    <div class="diagram-layer">
-                        <div class="diagram-box">
-                            <h4>Order Processing</h4>
-                            <p>Automated workflows</p>
-                        </div>
-                        <div class="diagram-box">
-                            <h4>Rate Calculator</h4>
-                            <p>Multi-carrier pricing</p>
-                        </div>
-                        <div class="diagram-box">
-                            <h4>Label Generator</h4>
-                            <p>Batch processing</p>
-                        </div>
-                    </div>
-                    
-                    <div class="diagram-arrow">
-                        <i class="fas fa-arrow-down"></i>
-                    </div>
-                    
-                    <!-- Integration Layer -->
-                    <div class="diagram-layer">
-                        <div class="diagram-box">
-                            <h4>USPS</h4>
-                            <p>API Integration</p>
-                        </div>
-                        <div class="diagram-box">
-                            <h4>UPS</h4>
-                            <p>API Integration</p>
-                        </div>
-                        <div class="diagram-box">
-                            <h4>FedEx</h4>
-                            <p>API Integration</p>
-                        </div>
-                        <div class="diagram-box">
-                            <h4>DHL</h4>
-                            <p>API Integration</p>
+                    <!-- Step 2: Processing -->
+                    <div class="diagram-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4 class="step-title">Intelligent Processing & Rate Calculation</h4>
+                            <p class="step-description">
+                                Our multi-tenant system processes orders through automated workflows, calculates shipping rates
+                                across multiple carriers, and generates optimized shipping solutions based on your preferences.
+                            </p>
+                            <div class="step-components">
+                                <span class="component-tag">Order Processing</span>
+                                <span class="component-tag">Rate Calculator</span>
+                                <span class="component-tag">Label Generator</span>
+                                <span class="component-tag">Batch Processing</span>
+                            </div>
                         </div>
                     </div>
                     
@@ -1067,30 +1124,54 @@
                         <i class="fas fa-arrow-down"></i>
                     </div>
                     
-                    <!-- Output Layer -->
-                    <div class="diagram-layer">
-                        <div class="diagram-box highlight">
-                            <h4>Shipping Labels</h4>
-                            <p>Print-ready labels</p>
+                    <!-- Step 3: Carrier Integration -->
+                    <div class="diagram-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4 class="step-title">Multi-Carrier API Integration</h4>
+                            <p class="step-description">
+                                We connect with major shipping carriers through their official APIs to get real-time rates,
+                                create shipping labels, and provide tracking information. All integrations are enterprise-grade and reliable.
+                            </p>
+                            <div class="step-components">
+                                <span class="component-tag">USPS API</span>
+                                <span class="component-tag">UPS API</span>
+                                <span class="component-tag">FedEx API</span>
+                                <span class="component-tag">DHL API</span>
+                            </div>
                         </div>
-                        <div class="diagram-box highlight">
-                            <h4>Tracking Info</h4>
-                            <p>Real-time updates</p>
-                        </div>
-                        <div class="diagram-box highlight">
-                            <h4>Analytics</h4>
-                            <p>Performance insights</p>
+                    </div>
+                    
+                    <div class="diagram-arrow">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    
+                    <!-- Step 4: Output & Analytics -->
+                    <div class="diagram-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4 class="step-title">Delivery & Performance Insights</h4>
+                            <p class="step-description">
+                                Receive print-ready shipping labels, real-time tracking information, and comprehensive analytics
+                                to optimize your shipping operations. Monitor performance and make data-driven decisions.
+                            </p>
+                            <div class="step-components">
+                                <span class="component-tag">Shipping Labels</span>
+                                <span class="component-tag">Tracking Updates</span>
+                                <span class="component-tag">Analytics Dashboard</span>
+                                <span class="component-tag">Performance Reports</span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="flow-description">
-                    <h4>How It Works</h4>
+                <div class="flow-summary">
+                    <h4>Why Choose DeckStack?</h4>
                     <p>
-                        <strong>1. Order Intake:</strong> Your e-commerce store sends order data to DeckStack via our secure API.<br>
-                        <strong>2. Processing:</strong> Our system automatically calculates shipping rates across multiple carriers and generates optimized shipping labels.<br>
-                        <strong>3. Carrier Integration:</strong> We connect with USPS, UPS, FedEx, and DHL APIs to get real-time rates and create shipping labels.<br>
-                        <strong>4. Delivery:</strong> You receive print-ready labels, tracking information, and detailed analytics to optimize your shipping operations.
+                        Our platform eliminates the complexity of managing multiple shipping carriers while providing
+                        enterprise-grade security, multi-tenant architecture, and comprehensive analytics. Whether you're
+                        a growing e-commerce business or an established enterprise, DeckStack scales with your needs and
+                        helps you optimize shipping costs while improving customer satisfaction.
                     </p>
                 </div>
             </div>
@@ -1142,21 +1223,76 @@
             }
         }
 
+        function validateForm() {
+            let isValid = true;
+            
+            // Clear previous errors
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('error');
+            });
+            
+            // Validate first name
+            const firstName = document.getElementById('signupFirstName');
+            if (!firstName.value.trim()) {
+                firstName.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+            
+            // Validate last name
+            const lastName = document.getElementById('signupLastName');
+            if (!lastName.value.trim()) {
+                lastName.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+            
+            // Validate email
+            const email = document.getElementById('signupEmail');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.value.trim() || !emailRegex.test(email.value)) {
+                email.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+            
+            // Validate company
+            const company = document.getElementById('signupCompany');
+            if (!company.value.trim()) {
+                company.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+            
+            // Validate password
+            const password = document.getElementById('signupPassword');
+            if (!password.value || password.value.length < 8) {
+                password.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+            
+            // Validate password confirmation
+            const passwordConfirm = document.getElementById('signupPasswordConfirm');
+            if (!passwordConfirm.value || passwordConfirm.value !== password.value) {
+                passwordConfirm.closest('.form-group').classList.add('error');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
         function handleSignup() {
-            const name = document.getElementById('signupName').value;
+            if (!validateForm()) {
+                return;
+            }
+            
+            const firstName = document.getElementById('signupFirstName').value;
+            const lastName = document.getElementById('signupLastName').value;
             const email = document.getElementById('signupEmail').value;
             const company = document.getElementById('signupCompany').value;
             const password = document.getElementById('signupPassword').value;
             
-            if (name && email && company && password) {
-                // Simulate signup process
-                alert('Account creation successful! In a real application, this would create your tenant and redirect to the onboarding flow.');
-                closeModal('signupModal');
-                // In a real app, this would make an API call to create the account
-                // window.location.href = 'dashboard.html?onboarding=true';
-            } else {
-                alert('Please fill in all fields.');
-            }
+            // Simulate signup process
+            alert(`Account creation successful for ${firstName} ${lastName}! In a real application, this would create your tenant and redirect to the onboarding flow.`);
+            closeModal('signupModal');
+            // In a real app, this would make an API call to create the account
+            // window.location.href = 'dashboard.html?onboarding=true';
         }
 
         // Close modal when clicking outside

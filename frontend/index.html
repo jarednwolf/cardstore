@@ -47,9 +47,9 @@
             --space-8: 2rem;
             --space-10: 2.5rem;
             --space-12: 3rem;
-            --space-16: 4rem;
-            --space-20: 5rem;
-            --space-24: 6rem;
+            --space-16: 3rem;
+            --space-20: 3.5rem;
+            --space-24: 4rem;
             
             /* Shadows */
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -151,7 +151,7 @@
         
         /* Hero Section */
         .hero-section {
-            padding: var(--space-24) 0 var(--space-20);
+            padding: var(--space-20) 0 var(--space-16);
             background: linear-gradient(135deg, var(--primary-50) 0%, white 100%);
             position: relative;
             overflow: hidden;
@@ -180,7 +180,7 @@
         .hero-title {
             font-size: clamp(2.5rem, 5vw, 4rem);
             font-weight: 800;
-            margin-bottom: var(--space-6);
+            margin-bottom: var(--space-4);
             line-height: 1.1;
             color: var(--gray-900);
             font-family: var(--font-display);
@@ -189,7 +189,7 @@
         
         .hero-subtitle {
             font-size: clamp(1.125rem, 2.5vw, 1.5rem);
-            margin-bottom: var(--space-6);
+            margin-bottom: var(--space-4);
             color: var(--gray-600);
             font-weight: 500;
             max-width: 42rem;
@@ -199,7 +199,7 @@
         
         .hero-description {
             font-size: 1.125rem;
-            margin-bottom: var(--space-10);
+            margin-bottom: var(--space-8);
             color: var(--gray-500);
             line-height: 1.7;
             max-width: 36rem;
@@ -212,7 +212,7 @@
             gap: var(--space-4);
             justify-content: center;
             flex-wrap: wrap;
-            margin-bottom: var(--space-16);
+            margin-bottom: var(--space-12);
         }
         
         .cta-primary {
@@ -288,13 +288,13 @@
         /* Features Section */
         .features-section {
             background: white;
-            padding: var(--space-20) 0;
+            padding: var(--space-16) 0;
             position: relative;
         }
         
         .section-header {
             text-align: center;
-            margin-bottom: var(--space-16);
+            margin-bottom: var(--space-12);
             max-width: 48rem;
             margin-left: auto;
             margin-right: auto;
@@ -304,7 +304,7 @@
         .section-title {
             font-size: clamp(2rem, 4vw, 2.5rem);
             font-weight: 700;
-            margin-bottom: var(--space-4);
+            margin-bottom: var(--space-3);
             color: var(--gray-900);
             font-family: var(--font-display);
             letter-spacing: -0.025em;
@@ -391,7 +391,7 @@
         .stats-section {
             background: var(--gray-900);
             color: white;
-            padding: var(--space-20) 0;
+            padding: var(--space-16) 0;
             position: relative;
         }
         
@@ -440,7 +440,7 @@
         /* Final CTA Section */
         .final-cta-section {
             background: var(--primary-50);
-            padding: var(--space-20) 0;
+            padding: var(--space-16) 0;
             text-align: center;
         }
         
@@ -453,7 +453,7 @@
         .final-cta-title {
             font-size: clamp(2rem, 4vw, 2.5rem);
             font-weight: 700;
-            margin-bottom: var(--space-6);
+            margin-bottom: var(--space-4);
             color: var(--gray-900);
             font-family: var(--font-display);
             letter-spacing: -0.025em;
@@ -462,7 +462,7 @@
         .final-cta-description {
             font-size: 1.125rem;
             color: var(--gray-600);
-            margin-bottom: var(--space-10);
+            margin-bottom: var(--space-8);
             line-height: 1.7;
         }
         
@@ -520,7 +520,7 @@
         
         @media (max-width: 480px) {
             .hero-section {
-                padding: var(--space-20) 0 var(--space-16);
+                padding: var(--space-16) 0 var(--space-12);
             }
             
             .stats-grid {
@@ -530,6 +530,221 @@
             .navbar-logo span {
                 display: none;
             }
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-2xl);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: var(--gray-900);
+            font-family: var(--font-display);
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-500);
+            padding: var(--space-2);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+        
+        .modal-body {
+            padding: var(--space-6);
+        }
+        
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-2);
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: var(--space-3);
+            border: 1px solid var(--gray-300);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-3);
+            padding: var(--space-6);
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .btn-modal {
+            padding: var(--space-3) var(--space-6);
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-modal.primary {
+            background: var(--primary-600);
+            color: white;
+        }
+        
+        .btn-modal.primary:hover {
+            background: var(--primary-700);
+        }
+        
+        .btn-modal.secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .btn-modal.secondary:hover {
+            background: var(--gray-200);
+        }
+        
+        /* Architecture Diagram Styles */
+        .architecture-modal .modal-content {
+            max-width: 900px;
+        }
+        
+        .architecture-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+            margin: var(--space-4) 0;
+        }
+        
+        .diagram-layer {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+        
+        .diagram-box {
+            background: var(--primary-50);
+            border: 2px solid var(--primary-200);
+            border-radius: 0.75rem;
+            padding: var(--space-4);
+            text-align: center;
+            min-width: 140px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .diagram-box:hover {
+            background: var(--primary-100);
+            border-color: var(--primary-300);
+            transform: translateY(-2px);
+        }
+        
+        .diagram-box.highlight {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-700);
+        }
+        
+        .diagram-box h4 {
+            margin: 0 0 var(--space-2) 0;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .diagram-box p {
+            margin: 0;
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        
+        .diagram-arrow {
+            display: flex;
+            justify-content: center;
+            color: var(--primary-500);
+            font-size: 1.5rem;
+        }
+        
+        .flow-description {
+            background: var(--gray-50);
+            padding: var(--space-4);
+            border-radius: 0.5rem;
+            margin-top: var(--space-4);
+        }
+        
+        .flow-description h4 {
+            margin: 0 0 var(--space-2) 0;
+            color: var(--gray-900);
+        }
+        
+        .flow-description p {
+            margin: 0;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -542,8 +757,8 @@
                 DeckStack
             </a>
             <div class="navbar-actions">
-                <a href="auth.html" class="navbar-btn login">Login</a>
-                <a href="auth.html" class="navbar-btn signup">Get Started</a>
+                <button class="navbar-btn login" onclick="openLoginModal()">Login</button>
+                <button class="navbar-btn signup" onclick="openSignupModal()">Get Started</button>
             </div>
         </div>
     </nav>
@@ -559,14 +774,14 @@
             </p>
             
             <div class="cta-buttons">
-                <a href="auth.html" class="cta-primary">
+                <button class="cta-primary" onclick="openSignupModal()">
                     <i class="fas fa-rocket"></i>
                     Start Free Trial
-                </a>
-                <a href="#features" class="cta-secondary">
+                </button>
+                <button class="cta-secondary" onclick="openArchitectureModal()">
                     <i class="fas fa-play"></i>
                     See How It Works
-                </a>
+                </button>
             </div>
             
             <div class="trust-indicators">
@@ -699,10 +914,10 @@
                 Start your free trial today and see the difference professional automation makes.
             </p>
             <div class="cta-buttons">
-                <a href="auth.html" class="cta-primary">
+                <button class="cta-primary" onclick="openSignupModal()">
                     <i class="fas fa-rocket"></i>
                     Start Free Trial
-                </a>
+                </button>
                 <a href="mailto:support@deckstack.com" class="cta-secondary">
                     <i class="fas fa-envelope"></i>
                     Contact Sales
@@ -711,7 +926,256 @@
         </div>
     </section>
 
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Welcome Back</h3>
+                <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal secondary" onclick="closeModal('loginModal')">Cancel</button>
+                <button class="btn-modal primary" onclick="handleLogin()">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Start Your Free Trial</h3>
+                <button class="modal-close" onclick="closeModal('signupModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupCompany">Company Name</label>
+                        <input type="text" id="signupCompany" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal secondary" onclick="closeModal('signupModal')">Cancel</button>
+                <button class="btn-modal primary" onclick="handleSignup()">Start Free Trial</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Architecture Modal -->
+    <div id="architectureModal" class="modal architecture-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>DeckStack Architecture Flow</h3>
+                <button class="modal-close" onclick="closeModal('architectureModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="architecture-diagram">
+                    <!-- User Layer -->
+                    <div class="diagram-layer">
+                        <div class="diagram-box highlight">
+                            <h4>E-commerce Store</h4>
+                            <p>Your online store</p>
+                        </div>
+                        <div class="diagram-box highlight">
+                            <h4>Admin Dashboard</h4>
+                            <p>Management interface</p>
+                        </div>
+                    </div>
+                    
+                    <div class="diagram-arrow">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    
+                    <!-- API Layer -->
+                    <div class="diagram-layer">
+                        <div class="diagram-box">
+                            <h4>DeckStack API</h4>
+                            <p>Multi-tenant REST API</p>
+                        </div>
+                    </div>
+                    
+                    <div class="diagram-arrow">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    
+                    <!-- Processing Layer -->
+                    <div class="diagram-layer">
+                        <div class="diagram-box">
+                            <h4>Order Processing</h4>
+                            <p>Automated workflows</p>
+                        </div>
+                        <div class="diagram-box">
+                            <h4>Rate Calculator</h4>
+                            <p>Multi-carrier pricing</p>
+                        </div>
+                        <div class="diagram-box">
+                            <h4>Label Generator</h4>
+                            <p>Batch processing</p>
+                        </div>
+                    </div>
+                    
+                    <div class="diagram-arrow">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    
+                    <!-- Integration Layer -->
+                    <div class="diagram-layer">
+                        <div class="diagram-box">
+                            <h4>USPS</h4>
+                            <p>API Integration</p>
+                        </div>
+                        <div class="diagram-box">
+                            <h4>UPS</h4>
+                            <p>API Integration</p>
+                        </div>
+                        <div class="diagram-box">
+                            <h4>FedEx</h4>
+                            <p>API Integration</p>
+                        </div>
+                        <div class="diagram-box">
+                            <h4>DHL</h4>
+                            <p>API Integration</p>
+                        </div>
+                    </div>
+                    
+                    <div class="diagram-arrow">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    
+                    <!-- Output Layer -->
+                    <div class="diagram-layer">
+                        <div class="diagram-box highlight">
+                            <h4>Shipping Labels</h4>
+                            <p>Print-ready labels</p>
+                        </div>
+                        <div class="diagram-box highlight">
+                            <h4>Tracking Info</h4>
+                            <p>Real-time updates</p>
+                        </div>
+                        <div class="diagram-box highlight">
+                            <h4>Analytics</h4>
+                            <p>Performance insights</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flow-description">
+                    <h4>How It Works</h4>
+                    <p>
+                        <strong>1. Order Intake:</strong> Your e-commerce store sends order data to DeckStack via our secure API.<br>
+                        <strong>2. Processing:</strong> Our system automatically calculates shipping rates across multiple carriers and generates optimized shipping labels.<br>
+                        <strong>3. Carrier Integration:</strong> We connect with USPS, UPS, FedEx, and DHL APIs to get real-time rates and create shipping labels.<br>
+                        <strong>4. Delivery:</strong> You receive print-ready labels, tracking information, and detailed analytics to optimize your shipping operations.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal secondary" onclick="closeModal('architectureModal')">Close</button>
+                <button class="btn-modal primary" onclick="openSignupModal(); closeModal('architectureModal');">Start Free Trial</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Modal Functions
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function openLoginModal() {
+            openModal('loginModal');
+        }
+
+        function openSignupModal() {
+            openModal('signupModal');
+        }
+
+        function openArchitectureModal() {
+            openModal('architectureModal');
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (email && password) {
+                // Simulate login process
+                alert('Login functionality will redirect to the dashboard. For demo purposes, this would authenticate with the backend.');
+                closeModal('loginModal');
+                // In a real app, this would redirect to dashboard.html or make an API call
+                // window.location.href = 'dashboard.html';
+            } else {
+                alert('Please fill in all fields.');
+            }
+        }
+
+        function handleSignup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const company = document.getElementById('signupCompany').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (name && email && company && password) {
+                // Simulate signup process
+                alert('Account creation successful! In a real application, this would create your tenant and redirect to the onboarding flow.');
+                closeModal('signupModal');
+                // In a real app, this would make an API call to create the account
+                // window.location.href = 'dashboard.html?onboarding=true';
+            } else {
+                alert('Please fill in all fields.');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeModal(e.target.id);
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const activeModal = document.querySelector('.modal.active');
+                if (activeModal) {
+                    closeModal(activeModal.id);
+                }
+            }
+        });
+
         // Navbar scroll effect
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('navbar');

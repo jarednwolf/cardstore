@@ -1,5 +1,5 @@
 /**
- * API Module for CardStore Operations Layer Frontend
+ * API Module for DeckStack Operations Layer Frontend
  * Handles all communication with the backend services
  */
 
@@ -24,14 +24,61 @@ class API {
         return window.location.origin;
     }
 
+    // Authentication methods
+    getAuthHeaders() {
+        const token = this.getAuthToken();
+        const tenantId = this.getTenantId();
+        
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        if (tenantId) {
+            headers['X-Tenant-ID'] = tenantId;
+        }
+        
+        return headers;
+    }
+
+    getAuthToken() {
+        // Try to get from localStorage first, then fallback to demo token
+        return localStorage.getItem('auth_token') || 'demo-token-for-testing';
+    }
+
+    getTenantId() {
+        // Try to get from localStorage first, then fallback to default
+        return localStorage.getItem('tenant_id') || this.getOrCreateDefaultTenant();
+    }
+
+    getOrCreateDefaultTenant() {
+        let tenantId = localStorage.getItem('tenant_id');
+        if (!tenantId) {
+            tenantId = 'test-tenant';
+            localStorage.setItem('tenant_id', tenantId);
+        }
+        return tenantId;
+    }
+
+    setAuthToken(token) {
+        localStorage.setItem('auth_token', token);
+    }
+
+    setTenantId(tenantId) {
+        localStorage.setItem('tenant_id', tenantId);
+    }
+
+    clearAuth() {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('tenant_id');
+    }
+
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
         const config = {
             timeout: this.timeout,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer demo-token-for-testing',
-                'X-Tenant-ID': 'test-tenant',
+                ...this.getAuthHeaders(),
                 ...options.headers
             },
             ...options
@@ -62,6 +109,31 @@ class API {
             }
             throw error;
         }
+    }
+
+    // Simplified HTTP methods for user management
+    async get(endpoint) {
+        return this.request(`/api/v1${endpoint}`);
+    }
+
+    async post(endpoint, data) {
+        return this.request(`/api/v1${endpoint}`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    }
+
+    async put(endpoint, data) {
+        return this.request(`/api/v1${endpoint}`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+    }
+
+    async delete(endpoint) {
+        return this.request(`/api/v1${endpoint}`, {
+            method: 'DELETE'
+        });
     }
 
     // Health Check APIs
@@ -277,8 +349,20 @@ class WebSocketManager {
     }
 
     connect() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // Check if we're in a serverless environment (Vercel, Netlify, etc.)
         const hostname = window.location.hostname;
+        const isServerless = hostname.includes('vercel.app') ||
+                           hostname.includes('netlify.app') ||
+                           hostname.includes('herokuapp.com') ||
+                           hostname.includes('railway.app');
+        
+        if (isServerless) {
+            console.log('WebSocket disabled in serverless environment');
+            this.emit('serverlessMode');
+            return;
+        }
+
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const port = hostname === 'localhost' || hostname === '127.0.0.1' ? `:${window.location.port || '3005'}` : '';
         const wsUrl = `${protocol}//${hostname}${port}/ws`;
 
@@ -316,6 +400,18 @@ class WebSocketManager {
     }
 
     attemptReconnect() {
+        // Don't attempt reconnection in serverless environments
+        const hostname = window.location.hostname;
+        const isServerless = hostname.includes('vercel.app') ||
+                           hostname.includes('netlify.app') ||
+                           hostname.includes('herokuapp.com') ||
+                           hostname.includes('railway.app');
+        
+        if (isServerless) {
+            console.log('Reconnection disabled in serverless environment');
+            return;
+        }
+
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
             console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);

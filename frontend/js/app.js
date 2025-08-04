@@ -202,7 +202,7 @@ class CardStoreApp {
     }
 
     isValidView(viewName) {
-        const validViews = ['dashboard', 'onboarding', 'health', 'management'];
+        const validViews = ['dashboard', 'onboarding', 'health', 'management', 'shipping', 'users'];
         return validViews.includes(viewName);
     }
 
@@ -230,6 +230,12 @@ class CardStoreApp {
             case 'management':
                 await this.initializeManagement();
                 break;
+            case 'shipping':
+                await this.initializeShipping();
+                break;
+            case 'users':
+                await this.initializeUsers();
+                break;
         }
     }
 
@@ -256,6 +262,94 @@ class CardStoreApp {
     async initializeManagement() {
         if (this.modules.management) {
             await this.modules.management.initialize();
+        }
+    }
+
+    async initializeShipping() {
+        try {
+            // Load orders for shipping
+            const ordersResult = await this.modules.api.safeRequest(() =>
+                this.modules.api.getOrders('processing')
+            );
+
+            if (ordersResult.success) {
+                this.updateOrdersList(ordersResult.data);
+            } else {
+                this.showOrdersError('Failed to load orders');
+            }
+        } catch (error) {
+            console.error('Failed to initialize shipping view:', error);
+            this.showOrdersError('Error loading shipping data');
+        }
+    }
+
+    async initializeUsers() {
+        // Initialize user management if userManager is available
+        if (window.userManager) {
+            // User manager will handle its own initialization
+            return;
+        }
+        
+        // Fallback: show loading message
+        const usersTableBody = document.getElementById('usersTableBody');
+        if (usersTableBody) {
+            usersTableBody.innerHTML = '<div class="loading">Loading users...</div>';
+        }
+    }
+
+    updateOrdersList(orders) {
+        const ordersList = document.getElementById('orders-list');
+        if (!ordersList) return;
+
+        if (!orders || orders.length === 0) {
+            ordersList.innerHTML = `
+                <div class="empty-state">
+                    <h3>No orders to process</h3>
+                    <p>All orders have been processed or there are no pending orders.</p>
+                </div>
+            `;
+            return;
+        }
+
+        ordersList.innerHTML = orders.map(order => `
+            <div class="order-card">
+                <div class="order-header">
+                    <h4>Order ${order.orderNumber || order.id}</h4>
+                    <span class="order-status ${order.status}">${order.status}</span>
+                </div>
+                <div class="order-details">
+                    <p><strong>Total:</strong> $${order.totalPrice}</p>
+                    <p><strong>Customer:</strong> ${order.channelData ? JSON.parse(order.channelData).customerName : 'N/A'}</p>
+                    <p><strong>Created:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div class="order-actions">
+                    <button class="btn primary" onclick="createShippingLabel('${order.id}')">
+                        <i class="fas fa-shipping-fast"></i>
+                        Create Label
+                    </button>
+                    <button class="btn secondary" onclick="viewOrderDetails('${order.id}')">
+                        <i class="fas fa-eye"></i>
+                        View Details
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    showOrdersError(message) {
+        const ordersList = document.getElementById('orders-list');
+        if (ordersList) {
+            ordersList.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Error Loading Orders</h3>
+                    <p>${message}</p>
+                    <button class="btn primary" onclick="window.cardStoreApp.initializeShipping()">
+                        <i class="fas fa-sync"></i>
+                        Retry
+                    </button>
+                </div>
+            `;
         }
     }
 

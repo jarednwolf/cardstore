@@ -359,7 +359,7 @@ class AuthSystem {
 
         // Redirect to main application
         setTimeout(() => {
-            window.location.href = '/index.html';
+            window.location.href = '/dashboard.html';
         }, 2000);
     }
 

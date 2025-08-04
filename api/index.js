@@ -282,6 +282,58 @@ app.get('/api/auth/me', (req, res) => {
   }
 });
 
+// Users endpoint
+app.get('/api/v1/users', (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  
+  // Demo users data
+  const users = [
+    {
+      id: 'user-1',
+      email: 'admin@deckstack.com',
+      name: 'Admin User',
+      role: 'owner',
+      tenantId: 'demo-tenant',
+      isActive: true,
+      lastLoginAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+      createdAt: new Date(Date.now() - 2592000000).toISOString(), // 30 days ago
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: 'user-2',
+      email: 'manager@deckstack.com',
+      name: 'Store Manager',
+      role: 'manager',
+      tenantId: 'demo-tenant',
+      isActive: true,
+      lastLoginAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+      createdAt: new Date(Date.now() - 1296000000).toISOString(), // 15 days ago
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: 'user-3',
+      email: 'staff@deckstack.com',
+      name: 'Staff Member',
+      role: 'staff',
+      tenantId: 'demo-tenant',
+      isActive: true,
+      lastLoginAt: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+      createdAt: new Date(Date.now() - 604800000).toISOString(), // 7 days ago
+      updatedAt: new Date().toISOString()
+    }
+  ];
+  
+  res.json({
+    users: users,
+    total: users.length,
+    page: page,
+    limit: limit,
+    totalPages: Math.ceil(users.length / limit),
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Orders endpoint
 app.get('/api/v1/orders', (req, res) => {
   res.json({

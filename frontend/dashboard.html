@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeckStack - Stack the deck in your favor</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-layer-group"></i>
+                        <h1>DeckStack</h1>
+                    </div>
+                    <div class="user-info">
+                        <span id="user-name">Loading...</span>
+                        <button class="btn secondary small" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </div>
+                    <nav class="nav">
+                        <button class="nav-btn active" data-view="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </button>
+                        <button class="nav-btn" data-view="onboarding">
+                            <i class="fas fa-rocket"></i>
+                            Setup Wizard
+                        </button>
+                        <button class="nav-btn" data-view="health">
+                            <i class="fas fa-heart-pulse"></i>
+                            Health Check
+                        </button>
+                        <button class="nav-btn" data-view="management">
+                            <i class="fas fa-cogs"></i>
+                            Management
+                        </button>
+                        <button class="nav-btn" data-view="shipping">
+                            <i class="fas fa-shipping-fast"></i>
+                            Shipping & Labels
+                        </button>
+                        <button class="nav-btn" data-view="users">
+                            <i class="fas fa-users"></i>
+                            User Management
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Dashboard View -->
+                <div id="dashboard-view" class="view active">
+                    <div class="welcome-section">
+                        <h2>Welcome to DeckStack</h2>
+                        <p>Stack the deck in your favor with automated shipping</p>
+                    </div>
+
+                    <div class="status-grid">
+                        <div class="status-card" id="system-status">
+                            <div class="status-header">
+                                <i class="fas fa-server"></i>
+                                <h3>System Status</h3>
+                            </div>
+                            <div class="status-content">
+                                <div class="status-indicator loading">
+                                    <span class="spinner"></span>
+                                    Checking...
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="status-card" id="services-status">
+                            <div class="status-header">
+                                <i class="fas fa-network-wired"></i>
+                                <h3>Services</h3>
+                            </div>
+                            <div class="status-content">
+                                <div class="service-list">
+                                    <div class="service-item">
+                                        <span>Application</span>
+                                        <span class="status-badge loading">Checking...</span>
+                                    </div>
+                                    <div class="service-item">
+                                        <span>Database</span>
+                                        <span class="status-badge loading">Checking...</span>
+                                    </div>
+                                    <div class="service-item">
+                                        <span>Redis</span>
+                                        <span class="status-badge loading">Checking...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="status-card" id="quick-actions">
+                            <div class="status-header">
+                                <i class="fas fa-bolt"></i>
+                                <h3>Quick Actions</h3>
+                            </div>
+                            <div class="status-content">
+                                <button class="action-btn primary" onclick="showView('onboarding')">
+                                    <i class="fas fa-rocket"></i>
+                                    Run Setup Wizard
+                                </button>
+                                <button class="action-btn secondary" onclick="runHealthCheck()">
+                                    <i class="fas fa-stethoscope"></i>
+                                    Health Check
+                                </button>
+                                <button class="action-btn secondary" onclick="showView('management')">
+                                    <i class="fas fa-cogs"></i>
+                                    System Management
+                                </button>
+                                <button class="action-btn primary" onclick="showView('shipping')">
+                                    <i class="fas fa-shipping-fast"></i>
+                                    Shipping & Labels
+                                </button>
+                                <button class="action-btn secondary" onclick="showView('users')">
+                                    <i class="fas fa-users"></i>
+                                    User Management
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="status-card" id="recent-activity">
+                            <div class="status-header">
+                                <i class="fas fa-clock"></i>
+                                <h3>Recent Activity</h3>
+                            </div>
+                            <div class="status-content">
+                                <div class="activity-list" id="activity-log">
+                                    <div class="activity-item">
+                                        <span class="activity-time">Just now</span>
+                                        <span class="activity-text">Dashboard loaded</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onboarding View -->
+                <div id="onboarding-view" class="view">
+                    <div class="wizard-container">
+                        <div class="wizard-header">
+                            <h2>Setup Wizard</h2>
+                            <p>Let's get your DeckStack system up and running!</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="wizard-progress"></div>
+                            </div>
+                            <div class="step-indicators" id="step-indicators">
+                                <div class="step active">1</div>
+                                <div class="step">2</div>
+                                <div class="step">3</div>
+                                <div class="step">4</div>
+                                <div class="step">5</div>
+                            </div>
+                        </div>
+
+                        <div class="wizard-content" id="wizard-content">
+                            <!-- Dynamic content will be loaded here -->
+                        </div>
+
+                        <div class="wizard-actions">
+                            <button class="btn secondary" id="prev-btn" onclick="previousStep()" disabled>
+                                <i class="fas fa-arrow-left"></i>
+                                Previous
+                            </button>
+                            <button class="btn primary" id="next-btn" onclick="nextStep()">
+                                Next
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Check View -->
+                <div id="health-view" class="view">
+                    <div class="health-container">
+                        <div class="health-header">
+                            <h2>System Health Check</h2>
+                            <p>Comprehensive diagnostics for your DeckStack system</p>
+                            <button class="btn primary" onclick="runHealthCheck()">
+                                <i class="fas fa-sync"></i>
+                                Run Health Check
+                            </button>
+                        </div>
+
+                        <div class="health-summary" id="health-summary">
+                            <div class="health-score">
+                                <div class="score-circle">
+                                    <span class="score-value" id="health-score">--</span>
+                                    <span class="score-label">Health Score</span>
+                                </div>
+                            </div>
+                            <div class="health-stats">
+                                <div class="stat">
+                                    <span class="stat-value" id="healthy-count">--</span>
+                                    <span class="stat-label">Healthy</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="warning-count">--</span>
+                                    <span class="stat-label">Warnings</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="error-count">--</span>
+                                    <span class="stat-label">Issues</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="health-categories" id="health-categories">
+                            <!-- Dynamic health check results will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Management View -->
+                <div id="management-view" class="view">
+                    <div class="management-container">
+                        <div class="management-header">
+                            <h2>System Management</h2>
+                            <p>Manage your DeckStack services and configuration</p>
+                        </div>
+
+                        <div class="management-grid">
+                            <div class="management-card">
+                                <div class="card-header">
+                                    <i class="fas fa-database"></i>
+                                    <h3>Database Management</h3>
+                                </div>
+                                <div class="card-content">
+                                    <p>Manage database migrations, seeding, and monitoring</p>
+                                    <div class="action-buttons">
+                                        <button class="btn secondary" onclick="runDatabaseMigration()">
+                                            <i class="fas fa-sync"></i>
+                                            Run Migrations
+                                        </button>
+                                        <button class="btn secondary" onclick="openPrismaStudio()">
+                                            <i class="fas fa-eye"></i>
+                                            Prisma Studio
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="management-card">
+                                <div class="card-header">
+                                    <i class="fas fa-cog"></i>
+                                    <h3>Environment Configuration</h3>
+                                </div>
+                                <div class="card-content">
+                                    <p>View and manage environment variables</p>
+                                    <div class="action-buttons">
+                                        <button class="btn secondary" onclick="showEnvironmentConfig()">
+                                            <i class="fas fa-edit"></i>
+                                            Edit Configuration
+                                        </button>
+                                        <button class="btn secondary" onclick="validateEnvironment()">
+                                            <i class="fas fa-check"></i>
+                                            Validate Config
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="management-card">
+                                <div class="card-header">
+                                    <i class="fas fa-docker"></i>
+                                    <h3>Docker Services</h3>
+                                </div>
+                                <div class="card-content">
+                                    <p>Manage Docker containers and services</p>
+                                    <div class="action-buttons">
+                                        <button class="btn success" onclick="startServices()">
+                                            <i class="fas fa-play"></i>
+                                            Start Services
+                                        </button>
+                                        <button class="btn danger" onclick="stopServices()">
+                                            <i class="fas fa-stop"></i>
+                                            Stop Services
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="management-card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-line"></i>
+                                    <h3>Monitoring & Logs</h3>
+                                </div>
+                                <div class="card-content">
+                                    <p>Access monitoring dashboards and system logs</p>
+                                    <div class="action-buttons">
+                                        <button class="btn secondary" onclick="openGrafana()">
+                                            <i class="fas fa-chart-bar"></i>
+                                            Grafana Dashboard
+                                        </button>
+                                        <button class="btn secondary" onclick="viewLogs()">
+                                            <i class="fas fa-file-alt"></i>
+                                            View Logs
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping View -->
+                <div id="shipping-view" class="view">
+                    <div class="shipping-container">
+                        <div class="shipping-header">
+                            <h2>Shipping & Labels</h2>
+                            <p>Manage orders and create shipping labels</p>
+                        </div>
+
+                        <div class="shipping-content">
+                            <div class="orders-section">
+                                <h3>Processing Orders</h3>
+                                <div class="orders-list" id="orders-list">
+                                    <div class="loading">Loading orders...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users View -->
+                <div id="users-view" class="view">
+                    <div class="users-container">
+                        <div class="users-header">
+                            <h2>User Management</h2>
+                            <p>Manage team members and permissions</p>
+                            <div class="users-actions">
+                                <button class="btn primary" onclick="openCreateUserModal()">
+                                    <i class="fas fa-plus"></i>
+                                    Add User
+                                </button>
+                                <button class="btn secondary" onclick="openInviteModal()">
+                                    <i class="fas fa-envelope"></i>
+                                    Send Invitation
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="users-filters">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="searchInput" placeholder="Search users...">
+                            </div>
+                            <select id="roleFilter">
+                                <option value="">All Roles</option>
+                                <option value="owner">Owner</option>
+                                <option value="manager">Manager</option>
+                                <option value="staff">Staff</option>
+                                <option value="fulfillment">Fulfillment</option>
+                            </select>
+                            <select id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+
+                        <div class="users-table">
+                            <div class="table-header">
+                                <div>User</div>
+                                <div>Email</div>
+                                <div>Role</div>
+                                <div>Status</div>
+                                <div>Last Login</div>
+                                <div>Actions</div>
+                            </div>
+                            <div class="table-body" id="usersTableBody">
+                                <div class="loading">Loading users...</div>
+                            </div>
+                        </div>
+
+                        <div class="pagination" id="pagination" style="display: none;">
+                            <button id="prevBtn" onclick="changePage(-1)">Previous</button>
+                            <span id="paginationInfo">Showing 0-0 of 0 users</span>
+                            <button id="nextBtn" onclick="changePage(1)">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- User Modal -->
+        <div id="userModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Add New User</h3>
+                    <button class="modal-close" onclick="closeUserModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <div class="form-group">
+                            <label for="userName">Name</label>
+                            <input type="text" id="userName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userEmail">Email</label>
+                            <input type="email" id="userEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userRole">Role</label>
+                            <select id="userRole" required>
+                                <option value="staff">Staff</option>
+                                <option value="fulfillment">Fulfillment</option>
+                                <option value="manager">Manager</option>
+                                <option value="owner">Owner</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="sendInvitationGroup">
+                            <label>
+                                <input type="checkbox" id="sendInvitation" checked>
+                                Send invitation email
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn secondary" onclick="closeUserModal()">Cancel</button>
+                    <button class="btn primary" id="submitBtn" type="submit" form="userForm">Create User</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invite Modal -->
+        <div id="inviteModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Send Invitation</h3>
+                    <button class="modal-close" onclick="closeInviteModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="inviteForm">
+                        <div class="form-group">
+                            <label for="inviteEmail">Email</label>
+                            <input type="email" id="inviteEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="inviteRole">Role</label>
+                            <select id="inviteRole" required>
+                                <option value="staff">Staff</option>
+                                <option value="fulfillment">Fulfillment</option>
+                                <option value="manager">Manager</option>
+                                <option value="owner">Owner</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="inviteMessage">Message (optional)</label>
+                            <textarea id="inviteMessage" rows="3" placeholder="Welcome to our team!"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn secondary" onclick="closeInviteModal()">Cancel</button>
+                    <button class="btn primary" type="submit" form="inviteForm">Send Invitation</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loading-content">
+                <div class="spinner-large"></div>
+                <h3 id="loading-title">Processing...</h3>
+                <p id="loading-message">Please wait while we complete the operation.</p>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Modal Title</h3>
+                    <button class="modal-close" onclick="closeModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Dynamic content -->
+                </div>
+                <div class="modal-footer" id="modal-footer">
+                    <button class="btn secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn primary" id="modal-confirm">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Authentication check - redirect to auth page if not logged in
+        (function() {
+            const token = localStorage.getItem('deckstack_token');
+            const user = localStorage.getItem('deckstack_user');
+            
+            if (!token || !user) {
+                // Not authenticated, redirect to auth page
+                window.location.href = 'auth.html';
+                return;
+            }
+            
+            // Check if token is expired (basic check)
+            try {
+                const userData = JSON.parse(user);
+                if (!userData.id) {
+                    throw new Error('Invalid user data');
+                }
+            } catch (error) {
+                // Invalid user data, clear and redirect
+                localStorage.removeItem('deckstack_token');
+                localStorage.removeItem('deckstack_user');
+                window.location.href = 'auth.html';
+                return;
+            }
+        })();
+    </script>
+    <script>
+        // Display user info and add logout functionality
+        function displayUserInfo() {
+            const user = localStorage.getItem('deckstack_user');
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    const userNameEl = document.getElementById('user-name');
+                    if (userNameEl) {
+                        userNameEl.textContent = userData.name || userData.email || 'User';
+                    }
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                }
+            }
+        }
+        
+        function logout() {
+            // Clear authentication data
+            localStorage.removeItem('deckstack_token');
+            localStorage.removeItem('deckstack_user');
+            
+            // Redirect to auth page
+            window.location.href = 'auth.html';
+        }
+        
+        // Initialize user info when page loads
+        document.addEventListener('DOMContentLoaded', displayUserInfo);
+    </script>
+    <script src="js/api.js"></script>
+    <script src="js/wizard.js"></script>
+    <script src="js/health.js"></script>
+    <script src="js/management.js"></script>
+    <script src="js/users.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

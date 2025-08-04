@@ -21,6 +21,8 @@ import { shippingRoutes } from './routes/shipping';
 import { webhookRoutes } from './routes/webhooks';
 import { onboardingRoutes } from './routes/onboarding';
 import { systemRoutes } from './routes/system';
+import tenantRoutes from './routes/tenants';
+import userRoutes from './routes/users';
 
 class Application {
   public app: express.Application;
@@ -128,6 +130,8 @@ class Application {
     apiRouter.use(tenantMiddleware);
 
     // API routes
+    apiRouter.use('/tenants', tenantRoutes);
+    apiRouter.use('/users', userRoutes);
     apiRouter.use('/products', productRoutes);
     apiRouter.use('/inventory', inventoryRoutes);
     apiRouter.use('/orders', orderRoutes);

@@ -70,6 +70,16 @@ export class InternalServerError extends Error {
   }
 }
 
+export class BadRequestError extends Error {
+  public statusCode = 400;
+  public code = 'BAD_REQUEST';
+
+  constructor(message: string = 'Bad request') {
+    super(message);
+    this.name = 'BadRequestError';
+  }
+}
+
 export const errorHandler = (
   error: AppError,
   req: Request,

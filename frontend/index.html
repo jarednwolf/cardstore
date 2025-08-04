@@ -4,339 +4,563 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeckStack - Stack the deck in your favor</title>
+    <meta name="description" content="Professional shipping automation platform for e-commerce businesses. Streamline your operations with multi-tenant user management and enterprise-grade features.">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Landing Page Specific Styles */
+        .landing-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .hero-section {
+            padding: 80px 0 120px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .hero-description {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+        
+        .cta-primary {
+            background: #ff6b6b;
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+        
+        .cta-primary:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(255, 107, 107, 0.4);
+        }
+        
+        .cta-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 18px 40px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .trust-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            opacity: 0.8;
+        }
+        
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .features-section {
+            background: white;
+            padding: 100px 0;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .feature-card {
+            text-align: center;
+            padding: 40px 30px;
+            border-radius: 20px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .feature-description {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        
+        .stats-section {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .stat-item {
+            padding: 20px;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ff6b6b;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+        
+        .final-cta-section {
+            background: white;
+            padding: 100px 0;
+            text-align: center;
+        }
+        
+        .final-cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .final-cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .final-cta-description {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        
+        .navbar-logo i {
+            color: #667eea;
+        }
+        
+        .navbar-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .navbar-btn {
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-btn.login {
+            color: #667eea;
+            background: transparent;
+            border: 2px solid #667eea;
+        }
+        
+        .navbar-btn.login:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .navbar-btn.signup {
+            background: #ff6b6b;
+            color: white;
+            border: 2px solid #ff6b6b;
+        }
+        
+        .navbar-btn.signup:hover {
+            background: #ff5252;
+            border-color: #ff5252;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .trust-indicators {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .navbar-actions {
+                gap: 10px;
+            }
+            
+            .navbar-btn {
+                padding: 8px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
-<body>
-    <div id="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="container">
-                <div class="header-content">
-                    <div class="logo">
-                        <i class="fas fa-layer-group"></i>
-                        <h1>DeckStack</h1>
-                    </div>
-                    <nav class="nav">
-                        <button class="nav-btn active" data-view="dashboard">
-                            <i class="fas fa-tachometer-alt"></i>
-                            Dashboard
-                        </button>
-                        <button class="nav-btn" data-view="onboarding">
-                            <i class="fas fa-rocket"></i>
-                            Setup Wizard
-                        </button>
-                        <button class="nav-btn" data-view="health">
-                            <i class="fas fa-heart-pulse"></i>
-                            Health Check
-                        </button>
-                        <button class="nav-btn" data-view="management">
-                            <i class="fas fa-cogs"></i>
-                            Management
-                        </button>
-                        <button class="nav-btn" onclick="window.open('shipping.html', '_blank')">
-                            <i class="fas fa-shipping-fast"></i>
-                            Shipping & Labels
-                        </button>
-                    </nav>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="main">
-            <div class="container">
-                <!-- Dashboard View -->
-                <div id="dashboard-view" class="view active">
-                    <div class="welcome-section">
-                        <h2>Welcome to DeckStack</h2>
-                        <p>Stack the deck in your favor with automated shipping</p>
-                    </div>
-
-                    <div class="status-grid">
-                        <div class="status-card" id="system-status">
-                            <div class="status-header">
-                                <i class="fas fa-server"></i>
-                                <h3>System Status</h3>
-                            </div>
-                            <div class="status-content">
-                                <div class="status-indicator loading">
-                                    <span class="spinner"></span>
-                                    Checking...
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="status-card" id="services-status">
-                            <div class="status-header">
-                                <i class="fas fa-network-wired"></i>
-                                <h3>Services</h3>
-                            </div>
-                            <div class="status-content">
-                                <div class="service-list">
-                                    <div class="service-item">
-                                        <span>Application</span>
-                                        <span class="status-badge loading">Checking...</span>
-                                    </div>
-                                    <div class="service-item">
-                                        <span>Database</span>
-                                        <span class="status-badge loading">Checking...</span>
-                                    </div>
-                                    <div class="service-item">
-                                        <span>Redis</span>
-                                        <span class="status-badge loading">Checking...</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="status-card" id="quick-actions">
-                            <div class="status-header">
-                                <i class="fas fa-bolt"></i>
-                                <h3>Quick Actions</h3>
-                            </div>
-                            <div class="status-content">
-                                <button class="action-btn primary" onclick="showView('onboarding')">
-                                    <i class="fas fa-rocket"></i>
-                                    Run Setup Wizard
-                                </button>
-                                <button class="action-btn secondary" onclick="runHealthCheck()">
-                                    <i class="fas fa-stethoscope"></i>
-                                    Health Check
-                                </button>
-                                <button class="action-btn secondary" onclick="showView('management')">
-                                    <i class="fas fa-cogs"></i>
-                                    System Management
-                                </button>
-                                <button class="action-btn primary" onclick="window.open('shipping.html', '_blank')">
-                                    <i class="fas fa-shipping-fast"></i>
-                                    Shipping & Labels
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="status-card" id="recent-activity">
-                            <div class="status-header">
-                                <i class="fas fa-clock"></i>
-                                <h3>Recent Activity</h3>
-                            </div>
-                            <div class="status-content">
-                                <div class="activity-list" id="activity-log">
-                                    <div class="activity-item">
-                                        <span class="activity-time">Just now</span>
-                                        <span class="activity-text">Dashboard loaded</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Onboarding View -->
-                <div id="onboarding-view" class="view">
-                    <div class="wizard-container">
-                        <div class="wizard-header">
-                            <h2>Setup Wizard</h2>
-                            <p>Let's get your DeckStack system up and running!</p>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="wizard-progress"></div>
-                            </div>
-                            <div class="step-indicators" id="step-indicators">
-                                <div class="step active">1</div>
-                                <div class="step">2</div>
-                                <div class="step">3</div>
-                                <div class="step">4</div>
-                                <div class="step">5</div>
-                            </div>
-                        </div>
-
-                        <div class="wizard-content" id="wizard-content">
-                            <!-- Dynamic content will be loaded here -->
-                        </div>
-
-                        <div class="wizard-actions">
-                            <button class="btn secondary" id="prev-btn" onclick="previousStep()" disabled>
-                                <i class="fas fa-arrow-left"></i>
-                                Previous
-                            </button>
-                            <button class="btn primary" id="next-btn" onclick="nextStep()">
-                                Next
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Health Check View -->
-                <div id="health-view" class="view">
-                    <div class="health-container">
-                        <div class="health-header">
-                            <h2>System Health Check</h2>
-                            <p>Comprehensive diagnostics for your DeckStack system</p>
-                            <button class="btn primary" onclick="runHealthCheck()">
-                                <i class="fas fa-sync"></i>
-                                Run Health Check
-                            </button>
-                        </div>
-
-                        <div class="health-summary" id="health-summary">
-                            <div class="health-score">
-                                <div class="score-circle">
-                                    <span class="score-value" id="health-score">--</span>
-                                    <span class="score-label">Health Score</span>
-                                </div>
-                            </div>
-                            <div class="health-stats">
-                                <div class="stat">
-                                    <span class="stat-value" id="healthy-count">--</span>
-                                    <span class="stat-label">Healthy</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-value" id="warning-count">--</span>
-                                    <span class="stat-label">Warnings</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-value" id="error-count">--</span>
-                                    <span class="stat-label">Issues</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="health-categories" id="health-categories">
-                            <!-- Dynamic health check results will be loaded here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Management View -->
-                <div id="management-view" class="view">
-                    <div class="management-container">
-                        <div class="management-header">
-                            <h2>System Management</h2>
-                            <p>Manage your DeckStack services and configuration</p>
-                        </div>
-
-                        <div class="management-grid">
-                            <div class="management-card">
-                                <div class="card-header">
-                                    <i class="fas fa-database"></i>
-                                    <h3>Database Management</h3>
-                                </div>
-                                <div class="card-content">
-                                    <p>Manage database migrations, seeding, and monitoring</p>
-                                    <div class="action-buttons">
-                                        <button class="btn secondary" onclick="runDatabaseMigration()">
-                                            <i class="fas fa-sync"></i>
-                                            Run Migrations
-                                        </button>
-                                        <button class="btn secondary" onclick="openPrismaStudio()">
-                                            <i class="fas fa-eye"></i>
-                                            Prisma Studio
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="management-card">
-                                <div class="card-header">
-                                    <i class="fas fa-cog"></i>
-                                    <h3>Environment Configuration</h3>
-                                </div>
-                                <div class="card-content">
-                                    <p>View and manage environment variables</p>
-                                    <div class="action-buttons">
-                                        <button class="btn secondary" onclick="showEnvironmentConfig()">
-                                            <i class="fas fa-edit"></i>
-                                            Edit Configuration
-                                        </button>
-                                        <button class="btn secondary" onclick="validateEnvironment()">
-                                            <i class="fas fa-check"></i>
-                                            Validate Config
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="management-card">
-                                <div class="card-header">
-                                    <i class="fas fa-docker"></i>
-                                    <h3>Docker Services</h3>
-                                </div>
-                                <div class="card-content">
-                                    <p>Manage Docker containers and services</p>
-                                    <div class="action-buttons">
-                                        <button class="btn success" onclick="startServices()">
-                                            <i class="fas fa-play"></i>
-                                            Start Services
-                                        </button>
-                                        <button class="btn danger" onclick="stopServices()">
-                                            <i class="fas fa-stop"></i>
-                                            Stop Services
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="management-card">
-                                <div class="card-header">
-                                    <i class="fas fa-chart-line"></i>
-                                    <h3>Monitoring & Logs</h3>
-                                </div>
-                                <div class="card-content">
-                                    <p>Access monitoring dashboards and system logs</p>
-                                    <div class="action-buttons">
-                                        <button class="btn secondary" onclick="openGrafana()">
-                                            <i class="fas fa-chart-bar"></i>
-                                            Grafana Dashboard
-                                        </button>
-                                        <button class="btn secondary" onclick="viewLogs()">
-                                            <i class="fas fa-file-alt"></i>
-                                            View Logs
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Loading Overlay -->
-        <div id="loading-overlay" class="loading-overlay hidden">
-            <div class="loading-content">
-                <div class="spinner-large"></div>
-                <h3 id="loading-title">Processing...</h3>
-                <p id="loading-message">Please wait while we complete the operation.</p>
+<body class="landing-page">
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <a href="#" class="navbar-logo">
+                <i class="fas fa-layer-group"></i>
+                DeckStack
+            </a>
+            <div class="navbar-actions">
+                <a href="auth.html" class="navbar-btn login">Login</a>
+                <a href="auth.html" class="navbar-btn signup">Get Started</a>
             </div>
         </div>
+    </nav>
 
-        <!-- Modal -->
-        <div id="modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modal-title">Modal Title</h3>
-                    <button class="modal-close" onclick="closeModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Stack the deck in your favor</h1>
+            <p class="hero-subtitle">Professional shipping automation for modern e-commerce</p>
+            <p class="hero-description">
+                Streamline your shipping operations with enterprise-grade multi-tenant platform. 
+                Perfect for e-commerce businesses, TCG retailers, and SaaS providers.
+            </p>
+            
+            <div class="cta-buttons">
+                <a href="auth.html" class="cta-primary">
+                    <i class="fas fa-rocket"></i>
+                    Start Free Trial
+                </a>
+                <a href="#features" class="cta-secondary">
+                    <i class="fas fa-play"></i>
+                    See How It Works
+                </a>
+            </div>
+            
+            <div class="trust-indicators">
+                <div class="trust-item">
+                    <i class="fas fa-shield-alt"></i>
+                    Enterprise Security
                 </div>
-                <div class="modal-body" id="modal-body">
-                    <!-- Dynamic content -->
+                <div class="trust-item">
+                    <i class="fas fa-users"></i>
+                    Multi-Tenant Ready
                 </div>
-                <div class="modal-footer" id="modal-footer">
-                    <button class="btn secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn primary" id="modal-confirm">Confirm</button>
+                <div class="trust-item">
+                    <i class="fas fa-shipping-fast"></i>
+                    Multi-Carrier Support
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-chart-line"></i>
+                    Production Ready
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Scripts -->
-    <script src="js/api.js"></script>
-    <script src="js/wizard.js"></script>
-    <script src="js/health.js"></script>
-    <script src="js/management.js"></script>
-    <script src="js/app.js"></script>
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3 class="feature-title">Enterprise Multi-Tenancy</h3>
+                <p class="feature-description">
+                    Complete data isolation, user management, and audit logging. 
+                    Serve multiple customers with enterprise-grade security.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shipping-fast"></i>
+                </div>
+                <h3 class="feature-title">Shipping Automation</h3>
+                <p class="feature-description">
+                    Multi-carrier support with USPS, UPS, FedEx, and DHL. 
+                    One-click label creation and real-time tracking.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cards-blank"></i>
+                </div>
+                <h3 class="feature-title">TCG Optimization</h3>
+                <p class="feature-description">
+                    Specialized features for trading card retailers. 
+                    High-value order handling and marketplace integration.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h3 class="feature-title">User Management</h3>
+                <p class="feature-description">
+                    Role-based access control with granular permissions. 
+                    Complete user lifecycle management and invitations.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">Security & Compliance</h3>
+                <p class="feature-description">
+                    Data encryption, audit trails, and GDPR compliance. 
+                    Enterprise-grade security for your business.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3 class="feature-title">Analytics & Monitoring</h3>
+                <p class="feature-description">
+                    Comprehensive dashboards and real-time monitoring. 
+                    Track performance and optimize operations.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number">99.9%</span>
+                <div class="stat-label">Uptime Guarantee</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">4+</span>
+                <div class="stat-label">Shipping Carriers</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">∞</span>
+                <div class="stat-label">Scalable Tenants</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">24/7</span>
+                <div class="stat-label">Support Available</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="final-cta-section">
+        <div class="final-cta-content">
+            <h2 class="final-cta-title">Ready to stack the deck?</h2>
+            <p class="final-cta-description">
+                Join thousands of businesses already using DeckStack to streamline their shipping operations. 
+                Start your free trial today and see the difference professional automation makes.
+            </p>
+            <div class="cta-buttons">
+                <a href="auth.html" class="cta-primary">
+                    <i class="fas fa-rocket"></i>
+                    Start Free Trial
+                </a>
+                <a href="mailto:support@deckstack.com" class="cta-secondary">
+                    <i class="fas fa-envelope"></i>
+                    Contact Sales
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
 </body>
 </html>

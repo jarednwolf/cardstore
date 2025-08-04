@@ -1,296 +1,343 @@
-# CardStore Operations Layer - Documentation
+# DeckStack - Enterprise Shipping Automation Platform
 
-## Overview
+**Stack the deck in your favor** with DeckStack's comprehensive shipping automation and multi-tenant user management system.
 
-The CardStore Operations Layer is a comprehensive operations platform that integrates with existing systems (BinderPOS for in-store POS, Shopify as ecommerce backend, TCGplayer for marketplace) to provide advanced inventory management, multi-channel marketplace syndication, purchasing/receiving workflows, and unified fulfillment capabilities for game and trading card stores.
+## 🚀 Overview
 
-## Documentation Structure
+DeckStack is a professional SaaS shipping automation platform designed for e-commerce businesses, with specialized features for trading card game (TCG) retailers. Built with enterprise-grade multi-tenancy, DeckStack enables service providers to serve multiple customers with complete data isolation and comprehensive user management.
 
-### Getting Started Documents
+## ✨ Key Features
 
-#### 🚀 [Getting Started Guide](./GETTING_STARTED.md)
-**Start here!** Comprehensive setup guide for users of all technical levels:
-- Quick start with automated setup wizard (5 minutes)
-- Manual setup instructions for advanced users
-- Platform-specific installation guides
-- Configuration examples and troubleshooting integration
+### 🏢 **Enterprise Multi-Tenancy**
+- **Complete Data Isolation** - Each tenant's data is completely separated
+- **User Management** - Full user lifecycle with roles and permissions
+- **Audit Logging** - Comprehensive activity tracking for compliance
+- **Tenant Administration** - Complete tenant lifecycle management
 
-#### 🏥 [Onboarding System Overview](./ONBOARDING_SYSTEM.md)
-Complete overview of the guided setup experience:
-- Interactive setup wizard features
-- Health check system capabilities
-- User journey documentation
-- Maintenance and future enhancements
+### 📦 **Shipping Automation**
+- **Multi-Carrier Support** - USPS, UPS, FedEx, DHL integration
+- **One-Click Label Creation** - Streamlined shipping workflow
+- **Batch Processing** - Handle multiple orders efficiently
+- **Real-Time Tracking** - Package tracking and delivery notifications
 
-#### 🔧 [Troubleshooting Guide](./TROUBLESHOOTING.md)
-Solutions to common setup and runtime issues:
-- Quick diagnosis with health check integration
-- Platform-specific troubleshooting
-- Recovery procedures and support contacts
+### 🎯 **TCG Optimization**
+- **High-Value Order Handling** - Specialized for trading card shipments
+- **Condition Tracking** - Card condition and grading support
+- **Set Management** - Organize by TCG sets and rarities
+- **Marketplace Integration** - Connect with TCG marketplaces
 
-### Core Documents
+### 🔐 **Security & Compliance**
+- **Role-Based Access Control** - Granular permission system
+- **Data Encryption** - Secure data at rest and in transit
+- **Audit Trails** - Complete activity logging
+- **GDPR Compliance** - Data export and retention policies
 
-#### 1. [Product Requirements Document (PRD)](./PRD.md)
-Comprehensive product requirements including:
-- Business objectives and success metrics
-- Functional and non-functional requirements
-- User stories and acceptance criteria
-- Timeline and milestones
+## 🏗️ Architecture
 
-#### 2. [Architecture Foundation](../ARCHITECTURE_FOUNDATION.md)
-High-level architectural overview including:
-- Technology stack recommendations
-- System architecture diagrams
-- Core design principles
-- Service organization
+DeckStack implements a **shared database, shared schema** multi-tenancy model:
 
-#### 3. [Technical Design Specification](./TECHNICAL_DESIGN.md)
-Detailed technical design including:
-- Service architecture and interfaces
-- Data models and relationships
-- Event-driven architecture patterns
-- Security and performance considerations
-
-#### 4. [Database Schema Design](./DATABASE_SCHEMA.md)
-Complete database design including:
-- Table structures and relationships
-- Indexes and performance optimization
-- Migration strategy
-- Multi-tenancy implementation
-
-#### 5. [Integration Patterns](./INTEGRATION_PATTERNS.md)
-External system integration patterns including:
-- Shopify integration (webhooks, API)
-- BinderPOS integration strategies
-- TCGplayer integration patterns
-- Marketplace connectors (eBay, Amazon)
-
-#### 6. [API Specifications](./API_SPECIFICATIONS.md)
-Complete API documentation including:
-- REST API endpoints
-- Request/response formats
-- Authentication and authorization
-- Error handling patterns
-
-### Implementation Documents
-
-#### 7. [Security and Compliance Requirements](./SECURITY_COMPLIANCE.md) *(Pending)*
-Security framework including:
-- Authentication and authorization
-- Data protection and encryption
-- Compliance requirements (PCI DSS)
-- Security monitoring and incident response
-
-#### 8. [Deployment and Infrastructure](./DEPLOYMENT_INFRASTRUCTURE.md) *(Pending)*
-Infrastructure and deployment strategy including:
-- Cloud architecture
-- Container orchestration
-- CI/CD pipelines
-- Monitoring and observability
-
-#### 9. [Testing Strategy](./TESTING_STRATEGY.md) *(Pending)*
-Quality assurance approach including:
-- Unit and integration testing
-- End-to-end testing
-- Performance testing
-- Security testing
-
-#### 10. [External API Research](./EXTERNAL_API_RESEARCH.md) *(Pending)*
-Research on external system capabilities:
-- BinderPOS API documentation and capabilities
-- TCGplayer API integration patterns
-- Marketplace API requirements
-
-### Process Documents
-
-#### 11. [Development Workflow](./DEVELOPMENT_WORKFLOW.md) *(Pending)*
-Development processes including:
-- Git workflow and branching strategy
-- Code review process
-- Release management
-- Contribution guidelines
-
-#### 12. [Monitoring and Operations](./MONITORING_OPERATIONS.md) *(Pending)*
-Operational procedures including:
-- System monitoring and alerting
-- Log management and analysis
-- Incident response procedures
-- Performance optimization
-
-#### 13. [User Stories and Acceptance Criteria](./USER_STORIES.md) *(Pending)*
-Detailed user stories for Phase 1 features:
-- Epic breakdown
-- Acceptance criteria
-- Testing scenarios
-
-#### 14. [Data Flow Diagrams](./DATA_FLOW_DIAGRAMS.md) *(Pending)*
-System interaction patterns including:
-- Order processing flows
-- Inventory synchronization
-- Event propagation patterns
-
-#### 15. [Risk Assessment](./RISK_ASSESSMENT.md) *(Pending)*
-Risk analysis and mitigation strategies:
-- Technical risks
-- Business risks
-- Operational risks
-- Mitigation plans
-
-## Quick Start Guide
-
-### 🚀 New to CardStore? Start Here!
-1. **[Getting Started Guide](./GETTING_STARTED.md)** - Complete setup in 5 minutes
-2. **Run the setup wizard**: `npm run setup`
-3. **Verify everything works**: `npm run health`
-4. **Start developing**: `npm run dev`
-
-### For Product Managers
-1. Start with the [PRD](./PRD.md) for business requirements
-2. Review [User Stories](./USER_STORIES.md) for feature details
-3. Check [Risk Assessment](./RISK_ASSESSMENT.md) for project risks
-
-### For Engineers
-1. **[Getting Started Guide](./GETTING_STARTED.md)** - Setup and first steps
-2. Review [Architecture Foundation](../ARCHITECTURE_FOUNDATION.md) for system overview
-3. Study [Technical Design](./TECHNICAL_DESIGN.md) for implementation details
-4. Reference [API Specifications](./API_SPECIFICATIONS.md) for interface contracts
-5. Check [Database Schema](./DATABASE_SCHEMA.md) for data models
-
-### For DevOps Engineers
-1. **[Getting Started Guide](./GETTING_STARTED.md)** - Infrastructure setup
-2. Review [Deployment and Infrastructure](./DEPLOYMENT_INFRASTRUCTURE.md)
-3. Study [Monitoring and Operations](./MONITORING_OPERATIONS.md)
-4. Check [Security and Compliance](./SECURITY_COMPLIANCE.md)
-
-### For QA Engineers
-1. **[Getting Started Guide](./GETTING_STARTED.md)** - Test environment setup
-2. Review [Testing Strategy](./TESTING_STRATEGY.md)
-3. Study [User Stories](./USER_STORIES.md) for acceptance criteria
-4. Reference [API Specifications](./API_SPECIFICATIONS.md) for testing endpoints
-
-### 🆘 Need Help?
-- **[Troubleshooting Guide](./TROUBLESHOOTING.md)** - Common issues and solutions
-- **Health check**: `npm run health` - Diagnose system problems
-- **Support**: engineering@cardstore.com
-
-## System Overview
-
-### Key Components
-- **Shopify Integration**: Primary system of record for products, customers, and orders
-- **BinderPOS Integration**: In-store POS system integration
-- **TCGplayer Integration**: Marketplace integration and price feeds
-- **Multi-Channel Sales**: eBay, Amazon, Google marketplace connectors
-- **Inventory Management**: Multi-location inventory with channel buffers
-- **Order Fulfillment**: Unified order processing and batch fulfillment
-- **Purchasing**: Distributor integration and receiving workflows
-
-### Technology Stack
-- **Runtime**: Node.js 18+ with TypeScript
-- **Database**: PostgreSQL 15+ with Redis caching
-- **Message Queue**: NATS JetStream for event streaming
-- **API Framework**: Express.js with OpenAPI documentation
-- **Container**: Docker with Kubernetes orchestration
-- **Monitoring**: Prometheus + Grafana + Jaeger
-
-### Integration Architecture
-```mermaid
-graph TB
-    subgraph "External Systems"
-        SHOP[Shopify]
-        BPOS[BinderPOS]
-        TCGP[TCGplayer]
-        EBAY[eBay]
-        SHIP[ShipStation]
-    end
-    
-    subgraph "CardStore Operations Layer"
-        GW[API Gateway]
-        CAT[Catalog Service]
-        INV[Inventory Service]
-        ORD[Order Service]
-        FUL[Fulfillment Service]
-    end
-    
-    subgraph "Data Layer"
-        PG[(PostgreSQL)]
-        REDIS[(Redis)]
-        NATS[Message Queue]
-    end
-    
-    SHOP --> GW
-    BPOS --> GW
-    TCGP --> GW
-    EBAY --> GW
-    SHIP --> GW
-    
-    GW --> CAT
-    GW --> INV
-    GW --> ORD
-    GW --> FUL
-    
-    CAT --> NATS
-    INV --> NATS
-    ORD --> NATS
-    FUL --> NATS
-    
-    NATS --> PG
-    NATS --> REDIS
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    DeckStack Platform                       │
+├─────────────────────────────────────────────────────────────┤
+│  Tenant A          │  Tenant B          │  Tenant C        │
+│  ┌─────────────┐   │  ┌─────────────┐   │  ┌─────────────┐ │
+│  │ Users       │   │  │ Users       │   │  │ Users       │ │
+│  │ Products    │   │  │ Products    │   │  │ Products    │ │
+│  │ Orders      │   │  │ Orders      │   │  │ Orders      │ │
+│  │ Shipping    │   │  │ Shipping    │   │  │ Shipping    │ │
+│  └─────────────┘   │  └─────────────┘   │  └─────────────┘ │
+├─────────────────────────────────────────────────────────────┤
+│                   Shared Database Layer                     │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-## Development Phases
+## 🛠️ Technology Stack
 
-### Phase 1: Foundation (Weeks 1-8)
-- Shopify integration and webhook processing
-- Core catalog and inventory services
-- Basic admin interface
-- CSV import/export functionality
+- **Backend**: Node.js, TypeScript, Express.js
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Supabase Auth with JWT tokens
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Deployment**: Vercel, Docker support
+- **Testing**: Jest with comprehensive test suites
 
-### Phase 2: Fulfillment and eBay (Weeks 6-14)
-- Unified order management
-- Batch fulfillment and shipping integration
-- eBay marketplace connector
-- Inventory synchronization across channels
+## 📚 Documentation
 
-### Phase 3: Purchasing and Advanced Features (Weeks 12-20)
-- Distributor integration and purchase orders
-- Receiving workflow
-- Advanced reporting and analytics
-- Online buylist (if prioritized)
+### Core Documentation
+- **[Getting Started](./GETTING_STARTED.md)** - Quick setup and installation
+- **[Technical Design](./TECHNICAL_DESIGN.md)** - System architecture and design
+- **[Database Schema](./DATABASE_SCHEMA.md)** - Complete database documentation
+- **[API Specifications](./API_SPECIFICATIONS.md)** - REST API reference
 
-### Phase 4: Scale and Optimization (Weeks 18-24)
-- Performance optimization
-- Additional marketplace connectors (Amazon/Google)
-- Advanced pricing rules and automation
-- Mobile optimization
+### Enterprise Features
+- **[Enterprise Features](./ENTERPRISE_FEATURES.md)** - Multi-tenant system overview
+- **[Multi-Tenant Architecture](./MULTI_TENANT_ARCHITECTURE.md)** - Architecture deep dive
+- **[User Guide](./USER_GUIDE.md)** - End-user documentation
+- **[Troubleshooting](./TROUBLESHOOTING.md)** - Common issues and solutions
 
-## Contributing
+### Development
+- **[Integration Patterns](./INTEGRATION_PATTERNS.md)** - Integration guidelines
+- **[Onboarding System](./ONBOARDING_SYSTEM.md)** - User onboarding flow
 
-### Documentation Updates
-1. Follow the existing document structure and formatting
-2. Update the table of contents when adding new sections
-3. Include Mermaid diagrams for complex workflows
-4. Reference related documents using relative links
+## 🚀 Quick Start
 
-### Review Process
-1. All documentation changes require review
-2. Technical documents should be reviewed by engineering leads
-3. Business documents should be reviewed by product management
-4. Architecture changes require architecture review
+### Prerequisites
+- Node.js 18+ and npm
+- PostgreSQL database
+- Supabase account (optional, for enhanced auth)
 
-## Support and Contact
+### Installation
 
-For questions about this documentation or the CardStore Operations Layer:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-org/deckstack.git
+   cd deckstack
+   ```
 
-- **Engineering Team**: engineering@cardstore.com
-- **Product Team**: product@cardstore.com
-- **Architecture Questions**: architecture@cardstore.com
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## Version History
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
 
-| Version | Date | Changes | Author |
-|---------|------|---------|--------|
-| 1.0 | 2025-08-02 | Initial documentation suite | Engineering Team |
+4. **Initialize database**
+   ```bash
+   npx prisma migrate deploy
+   npm run seed
+   ```
+
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Access the application**
+   - Frontend: http://localhost:3005
+   - API: http://localhost:3005/api/v1
+   - Health Check: http://localhost:3005/health
+
+## 👥 User Roles
+
+| Role | Description | Permissions |
+|------|-------------|-------------|
+| **Owner** | Tenant administrator | Full access to all resources and settings |
+| **Manager** | Business operations | Manage products, orders, inventory, reports |
+| **Staff** | Daily operations | Manage inventory and orders, view products |
+| **Fulfillment** | Warehouse operations | Update orders and inventory for shipping |
+
+## 🔧 Configuration
+
+### Environment Variables
+```bash
+# Database
+DATABASE_URL="postgresql://user:pass@localhost:5432/deckstack"
+
+# Authentication
+JWT_SECRET="your-secure-jwt-secret"
+SUPABASE_URL="your-supabase-url"
+SUPABASE_ANON_KEY="your-supabase-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-key"
+
+# Application
+NODE_ENV="development"
+PORT=3005
+API_VERSION="v1"
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+```
+
+### Tenant Configuration
+```javascript
+// Example tenant settings
+{
+  "features": {
+    "multiLocation": true,
+    "advancedReporting": true,
+    "apiAccess": true,
+    "customBranding": false
+  },
+  "security": {
+    "requireMFA": false,
+    "sessionTimeout": 480,
+    "auditLogging": true
+  },
+  "billing": {
+    "plan": "professional",
+    "billingCycle": "monthly"
+  }
+}
+```
+
+## 📊 API Overview
+
+### Authentication
+```http
+POST /api/v1/auth/login
+POST /api/v1/auth/signup
+POST /api/v1/auth/refresh
+```
+
+### Tenant Management
+```http
+GET    /api/v1/tenants/current
+PUT    /api/v1/tenants/{id}/settings
+GET    /api/v1/tenants/{id}/stats
+```
+
+### User Management
+```http
+GET    /api/v1/users
+POST   /api/v1/users
+PUT    /api/v1/users/{id}
+POST   /api/v1/users/invite
+GET    /api/v1/users/profile
+```
+
+### Products & Inventory
+```http
+GET    /api/v1/products
+POST   /api/v1/products
+GET    /api/v1/inventory
+PUT    /api/v1/inventory/{id}
+```
+
+### Orders & Shipping
+```http
+GET    /api/v1/orders
+POST   /api/v1/orders
+GET    /api/v1/shipping/rates
+POST   /api/v1/shipping/labels
+```
+
+## 🧪 Testing
+
+### Run Tests
+```bash
+# Unit tests
+npm test
+
+# Integration tests
+npm run test:integration
+
+# Multi-tenant security tests
+npm run test:security
+
+# Coverage report
+npm run test:coverage
+```
+
+### Test Categories
+- **Unit Tests** - Individual component testing
+- **Integration Tests** - API endpoint testing
+- **Security Tests** - Multi-tenant isolation validation
+- **Performance Tests** - Load and stress testing
+
+## 🚀 Deployment
+
+### Production Deployment
+```bash
+# Build application
+npm run build
+
+# Run database migrations
+npx prisma migrate deploy
+
+# Start production server
+npm start
+```
+
+### Docker Deployment
+```bash
+# Build Docker image
+docker build -t deckstack .
+
+# Run container
+docker run -p 3005:3005 deckstack
+```
+
+### Vercel Deployment
+```bash
+# Deploy to Vercel
+vercel --prod
+```
+
+## 📈 Monitoring
+
+### Health Checks
+- **Application Health**: `/health`
+- **Database Health**: `/health/db`
+- **API Health**: `/api/v1/health`
+
+### Metrics
+- Active tenants and users
+- API response times
+- Database query performance
+- Security events and audit logs
+
+## 🔒 Security
+
+### Security Features
+- **Multi-Factor Authentication** (optional)
+- **Role-Based Access Control**
+- **Data Encryption** at rest and in transit
+- **Rate Limiting** and DDoS protection
+- **SQL Injection Prevention**
+- **XSS Protection**
+- **CSRF Protection**
+
+### Compliance
+- **GDPR** - Data export and deletion
+- **SOC 2** - Security controls and audit trails
+- **PCI DSS** - Payment data security (when applicable)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+
+## 🆘 Support
+
+- **Documentation**: [docs/](./docs/)
+- **Issues**: [GitHub Issues](https://github.com/your-org/deckstack/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/deckstack/discussions)
+- **Email**: support@deckstack.com
+
+## 🎯 Roadmap
+
+### Current Version (v1.0)
+✅ Multi-tenant architecture
+✅ User management system
+✅ Basic shipping automation
+✅ TCG-specific features
+
+### Upcoming Features (v1.1)
+- [ ] Advanced analytics dashboard
+- [ ] Real-time notifications
+- [ ] Mobile application
+- [ ] Advanced reporting tools
+- [ ] Marketplace integrations
+
+### Future Enhancements (v2.0)
+- [ ] AI-powered shipping optimization
+- [ ] Advanced inventory forecasting
+- [ ] Custom workflow automation
+- [ ] Third-party app marketplace
 
 ---
 
-*This documentation is maintained by the CardStore Engineering Team and is updated regularly as the system evolves.*
+**DeckStack** - Professional shipping automation for the modern e-commerce business.
+*Stack the deck in your favor.*

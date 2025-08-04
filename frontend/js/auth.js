@@ -1,806 +1,556 @@
 /**
- * Authentication Module for CardStore
- * Handles user registration, login, and session management
+ * DeckStack Authentication System
+ * Handles login, signup, and user authentication flows
  */
 
-class AuthManager {
+class AuthSystem {
     constructor() {
-        this.currentUser = null;
-        this.authToken = null;
-        this.refreshToken = null;
-        this.apiBaseUrl = '/api';
+        this.currentSection = 'landing';
+        this.isProcessing = false;
+        this.baseURL = this.getBaseURL();
         
-        this.initializeAuth();
+        this.initializeEventListeners();
+        this.initializeFormValidation();
     }
 
-    async initializeAuth() {
-        // Check for existing session
-        this.loadStoredAuth();
+    getBaseURL() {
+        // Determine the backend URL based on environment
+        const protocol = window.location.protocol;
+        const hostname = window.location.hostname;
         
-        // Verify token if exists
-        if (this.authToken) {
-            const isValid = await this.verifyToken();
-            if (!isValid) {
-                this.clearAuth();
-            }
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            const port = window.location.port || '3005';
+            return `${protocol}//${hostname}:${port}`;
         }
         
-        // Set up auth UI
-        this.setupAuthUI();
+        return window.location.origin;
     }
 
-    loadStoredAuth() {
-        try {
-            this.authToken = localStorage.getItem('cardstore_auth_token');
-            this.refreshToken = localStorage.getItem('cardstore_refresh_token');
-            const userData = localStorage.getItem('cardstore_user');
-            if (userData) {
-                this.currentUser = JSON.parse(userData);
-            }
-        } catch (error) {
-            console.error('Error loading stored auth:', error);
-            this.clearAuth();
-        }
-    }
+    initializeEventListeners() {
+        // Form submissions
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
 
-    saveAuth(authData) {
-        try {
-            if (authData.session?.access_token) {
-                this.authToken = authData.session.access_token;
-                localStorage.setItem('cardstore_auth_token', this.authToken);
-            }
-            
-            if (authData.session?.refresh_token) {
-                this.refreshToken = authData.session.refresh_token;
-                localStorage.setItem('cardstore_refresh_token', this.refreshToken);
-            }
-            
-            if (authData.user) {
-                this.currentUser = authData.user;
-                localStorage.setItem('cardstore_user', JSON.stringify(authData.user));
-            }
-        } catch (error) {
-            console.error('Error saving auth:', error);
-        }
-    }
-
-    clearAuth() {
-        this.currentUser = null;
-        this.authToken = null;
-        this.refreshToken = null;
-        
-        localStorage.removeItem('cardstore_auth_token');
-        localStorage.removeItem('cardstore_refresh_token');
-        localStorage.removeItem('cardstore_user');
-    }
-
-    async verifyToken() {
-        if (!this.authToken) return false;
-        
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/auth/me`, {
-                headers: {
-                    'Authorization': `Bearer ${this.authToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                if (result.data?.user) {
-                    this.currentUser = result.data.user;
-                    localStorage.setItem('cardstore_user', JSON.stringify(this.currentUser));
-                    return true;
-                }
-            }
-            
-            return false;
-        } catch (error) {
-            console.error('Token verification failed:', error);
-            return false;
-        }
-    }
-
-    async signUp(userData) {
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/auth/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userData)
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok && result.data) {
-                this.saveAuth(result.data);
-                this.updateAuthUI();
-                return { success: true, data: result.data };
-            } else {
-                return { 
-                    success: false, 
-                    error: result.error?.message || 'Sign up failed' 
-                };
-            }
-        } catch (error) {
-            console.error('Sign up error:', error);
-            return { 
-                success: false, 
-                error: 'Network error. Please check your connection and try again.' 
-            };
-        }
-    }
-
-    async signIn(credentials) {
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(credentials)
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok && result.data) {
-                this.saveAuth(result.data);
-                this.updateAuthUI();
-                return { success: true, data: result.data };
-            } else {
-                return { 
-                    success: false, 
-                    error: result.error?.message || 'Sign in failed' 
-                };
-            }
-        } catch (error) {
-            console.error('Sign in error:', error);
-            return { 
-                success: false, 
-                error: 'Network error. Please check your connection and try again.' 
-            };
-        }
-    }
-
-    async signOut() {
-        try {
-            if (this.authToken) {
-                await fetch(`${this.apiBaseUrl}/auth/logout`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${this.authToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-            }
-        } catch (error) {
-            console.error('Sign out error:', error);
-        } finally {
-            this.clearAuth();
-            this.updateAuthUI();
-            // Redirect to login
-            this.showAuthModal('signin');
-        }
-    }
-
-    async createTenant(tenantData) {
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/v1/onboarding/create-tenant`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(tenantData)
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok && result.data) {
-                this.saveAuth(result.data);
-                this.updateAuthUI();
-                return { success: true, data: result.data };
-            } else {
-                return { 
-                    success: false, 
-                    error: result.error?.message || 'Store creation failed' 
-                };
-            }
-        } catch (error) {
-            console.error('Tenant creation error:', error);
-            return { 
-                success: false, 
-                error: 'Network error. Please check your connection and try again.' 
-            };
-        }
-    }
-
-    async checkSubdomainAvailability(subdomain) {
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/v1/onboarding/check-subdomain/${subdomain}`);
-            const result = await response.json();
-            
-            if (response.ok && result.data) {
-                return { success: true, data: result.data };
-            } else {
-                return { 
-                    success: false, 
-                    error: result.error?.message || 'Failed to check subdomain' 
-                };
-            }
-        } catch (error) {
-            console.error('Subdomain check error:', error);
-            return { 
-                success: false, 
-                error: 'Network error. Please try again.' 
-            };
-        }
-    }
-
-    setupAuthUI() {
-        // Check if user is authenticated
-        if (this.isAuthenticated()) {
-            this.updateAuthUI();
-        } else {
-            // Show auth modal if not authenticated
-            this.showAuthModal('signin');
-        }
-    }
-
-    updateAuthUI() {
-        // Update header with user info
-        const storeStatus = document.getElementById('store-status');
-        if (storeStatus && this.currentUser) {
-            storeStatus.innerHTML = `
-                <div class="user-info">
-                    <div class="user-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="user-details">
-                        <span class="user-name">${this.currentUser.email}</span>
-                        <span class="user-role">Store Owner</span>
-                    </div>
-                    <div class="user-menu">
-                        <button class="btn-icon" onclick="window.authManager.showUserMenu()">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-    }
-
-    showAuthModal(mode = 'signin') {
-        // Remove existing modal
-        const existingModal = document.getElementById('auth-modal');
-        if (existingModal) {
-            existingModal.remove();
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
         }
 
-        // Create auth modal
-        const modal = document.createElement('div');
-        modal.id = 'auth-modal';
-        modal.className = 'auth-modal';
-        modal.innerHTML = this.getAuthModalHTML(mode);
-        
-        document.body.appendChild(modal);
-        
-        // Set up event listeners
-        this.setupAuthModalEvents(modal, mode);
-        
-        // Show modal
-        setTimeout(() => modal.classList.add('show'), 10);
-    }
-
-    getAuthModalHTML(mode) {
-        if (mode === 'create-store') {
-            return `
-                <div class="auth-modal-overlay">
-                    <div class="auth-modal-content">
-                        <div class="auth-header">
-                            <h2>Create Your Card Store</h2>
-                            <p>Set up your store and start managing your inventory</p>
-                        </div>
-                        <form id="create-store-form" class="auth-form">
-                            <div class="form-group">
-                                <label>Your Email</label>
-                                <input type="email" name="email" required placeholder="you@example.com">
-                            </div>
-                            <div class="form-group">
-                                <label>Password</label>
-                                <input type="password" name="password" required placeholder="Choose a secure password">
-                                <small>At least 8 characters</small>
-                            </div>
-                            <div class="form-group">
-                                <label>Your Full Name</label>
-                                <input type="text" name="fullName" required placeholder="John Doe">
-                            </div>
-                            <div class="form-group">
-                                <label>Store Name</label>
-                                <input type="text" name="tenantName" required placeholder="My Card Shop">
-                            </div>
-                            <div class="form-group">
-                                <label>Store URL</label>
-                                <div class="url-input">
-                                    <input type="text" name="tenantSubdomain" required placeholder="mystore">
-                                    <span>.cardstore.com</span>
-                                </div>
-                                <small class="subdomain-status"></small>
-                            </div>
-                            <button type="submit" class="btn primary large">
-                                <i class="fas fa-store"></i>
-                                Create My Store
-                            </button>
-                        </form>
-                        <div class="auth-footer">
-                            <p>Already have an account? <a href="#" onclick="window.authManager.showAuthModal('signin')">Sign In</a></p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else if (mode === 'signup') {
-            return `
-                <div class="auth-modal-overlay">
-                    <div class="auth-modal-content">
-                        <div class="auth-header">
-                            <h2>Create Account</h2>
-                            <p>Join CardStore to manage your inventory</p>
-                        </div>
-                        <form id="signup-form" class="auth-form">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" name="email" required placeholder="you@example.com">
-                            </div>
-                            <div class="form-group">
-                                <label>Password</label>
-                                <input type="password" name="password" required placeholder="Choose a secure password">
-                                <small>At least 8 characters</small>
-                            </div>
-                            <div class="form-group">
-                                <label>Full Name</label>
-                                <input type="text" name="fullName" required placeholder="John Doe">
-                            </div>
-                            <button type="submit" class="btn primary large">
-                                <i class="fas fa-user-plus"></i>
-                                Create Account
-                            </button>
-                        </form>
-                        <div class="auth-footer">
-                            <p>Already have an account? <a href="#" onclick="window.authManager.showAuthModal('signin')">Sign In</a></p>
-                            <p>Want to create a store? <a href="#" onclick="window.authManager.showAuthModal('create-store')">Create Store</a></p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            return `
-                <div class="auth-modal-overlay">
-                    <div class="auth-modal-content">
-                        <div class="auth-header">
-                            <h2>Welcome Back</h2>
-                            <p>Sign in to your CardStore account</p>
-                        </div>
-                        <form id="signin-form" class="auth-form">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" name="email" required placeholder="you@example.com">
-                            </div>
-                            <div class="form-group">
-                                <label>Password</label>
-                                <input type="password" name="password" required placeholder="Your password">
-                            </div>
-                            <button type="submit" class="btn primary large">
-                                <i class="fas fa-sign-in-alt"></i>
-                                Sign In
-                            </button>
-                        </form>
-                        <div class="auth-footer">
-                            <p>Don't have an account? <a href="#" onclick="window.authManager.showAuthModal('signup')">Sign Up</a></p>
-                            <p>Want to create a store? <a href="#" onclick="window.authManager.showAuthModal('create-store')">Create Store</a></p>
-                        </div>
-                    </div>
-                </div>
-            `;
+        if (signupForm) {
+            signupForm.addEventListener('submit', (e) => this.handleSignup(e));
         }
-    }
 
-    setupAuthModalEvents(modal, mode) {
-        const form = modal.querySelector('.auth-form');
-        if (!form) return;
-
-        // Handle form submission
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            // Show loading state
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Please wait...';
-            submitBtn.disabled = true;
-            
-            try {
-                let result;
-                
-                if (mode === 'create-store') {
-                    result = await this.createTenant(data);
-                } else if (mode === 'signup') {
-                    result = await this.signUp(data);
-                } else {
-                    result = await this.signIn(data);
-                }
-                
-                if (result.success) {
-                    modal.remove();
-                    this.showSuccessMessage(mode === 'create-store' ? 'Store created successfully!' : 'Welcome to CardStore!');
-                } else {
-                    this.showError(result.error);
-                }
-            } catch (error) {
-                this.showError('Something went wrong. Please try again.');
-            } finally {
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
+        // Social auth buttons
+        document.querySelectorAll('.btn.social').forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleSocialAuth(e));
         });
 
-        // Handle subdomain checking for create-store mode
-        if (mode === 'create-store') {
-            const subdomainInput = form.querySelector('input[name="tenantSubdomain"]');
-            const statusElement = form.querySelector('.subdomain-status');
-            
-            if (subdomainInput && statusElement) {
-                let checkTimeout;
-                subdomainInput.addEventListener('input', (e) => {
-                    clearTimeout(checkTimeout);
-                    const subdomain = e.target.value.trim();
-                    
-                    if (subdomain.length >= 3) {
-                        checkTimeout = setTimeout(async () => {
-                            const result = await this.checkSubdomainAvailability(subdomain);
-                            if (result.success && result.data) {
-                                if (result.data.available) {
-                                    statusElement.innerHTML = '<i class="fas fa-check text-success"></i> Available';
-                                    statusElement.className = 'subdomain-status available';
-                                } else {
-                                    statusElement.innerHTML = '<i class="fas fa-times text-danger"></i> Not available';
-                                    statusElement.className = 'subdomain-status unavailable';
-                                }
-                            }
-                        }, 500);
-                    } else {
-                        statusElement.innerHTML = '';
-                        statusElement.className = 'subdomain-status';
-                    }
-                });
-            }
-        }
-
-        // Handle modal close
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal || e.target.classList.contains('auth-modal-overlay')) {
-                // Don't allow closing if not authenticated
-                if (!this.isAuthenticated()) {
-                    this.showError('Please sign in to continue');
-                    return;
-                }
-                modal.remove();
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.showLanding();
             }
         });
     }
 
-    showUserMenu() {
-        // Create user menu dropdown
-        const menu = document.createElement('div');
-        menu.className = 'user-menu-dropdown';
-        menu.innerHTML = `
-            <div class="menu-item" onclick="window.authManager.showProfile()">
-                <i class="fas fa-user"></i>
-                Profile
-            </div>
-            <div class="menu-item" onclick="window.authManager.showSettings()">
-                <i class="fas fa-cog"></i>
-                Settings
-            </div>
-            <div class="menu-divider"></div>
-            <div class="menu-item" onclick="window.authManager.signOut()">
-                <i class="fas fa-sign-out-alt"></i>
-                Sign Out
-            </div>
-        `;
-        
-        document.body.appendChild(menu);
-        
-        // Position menu
-        const userInfo = document.querySelector('.user-info');
-        if (userInfo) {
-            const rect = userInfo.getBoundingClientRect();
-            menu.style.position = 'fixed';
-            menu.style.top = `${rect.bottom + 5}px`;
-            menu.style.right = '20px';
+    initializeFormValidation() {
+        // Real-time validation for email fields
+        const emailInputs = document.querySelectorAll('input[type="email"]');
+        emailInputs.forEach(input => {
+            input.addEventListener('blur', () => this.validateEmail(input));
+            input.addEventListener('input', () => this.clearError(input));
+        });
+
+        // Password strength validation
+        const passwordInputs = document.querySelectorAll('input[type="password"]');
+        passwordInputs.forEach(input => {
+            input.addEventListener('input', () => this.validatePassword(input));
+        });
+
+        // Company name validation for signup
+        const companyInput = document.getElementById('signup-company');
+        if (companyInput) {
+            companyInput.addEventListener('blur', () => this.validateCompany(companyInput));
         }
-        
-        // Close menu when clicking outside
+    }
+
+    // Section Navigation
+    showLanding() {
+        this.showSection('landing');
+    }
+
+    showLogin() {
+        this.showSection('login');
+        // Focus on email input
         setTimeout(() => {
-            document.addEventListener('click', function closeMenu(e) {
-                if (!menu.contains(e.target)) {
-                    menu.remove();
-                    document.removeEventListener('click', closeMenu);
-                }
+            const emailInput = document.getElementById('login-email');
+            if (emailInput) emailInput.focus();
+        }, 100);
+    }
+
+    showSignup() {
+        this.showSection('signup');
+        // Focus on first name input
+        setTimeout(() => {
+            const firstNameInput = document.getElementById('signup-first-name');
+            if (firstNameInput) firstNameInput.focus();
+        }, 100);
+    }
+
+    showSection(sectionName) {
+        // Hide all sections
+        document.querySelectorAll('.auth-section').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Show target section
+        const targetSection = document.getElementById(`${sectionName}-section`);
+        if (targetSection) {
+            targetSection.classList.add('active');
+            this.currentSection = sectionName;
+        }
+
+        // Update URL without page reload
+        const url = new URL(window.location);
+        if (sectionName === 'landing') {
+            url.searchParams.delete('view');
+        } else {
+            url.searchParams.set('view', sectionName);
+        }
+        history.pushState({ view: sectionName }, '', url);
+    }
+
+    // Form Handlers
+    async handleLogin(event) {
+        event.preventDefault();
+        
+        if (this.isProcessing) return;
+
+        const form = event.target;
+        const formData = new FormData(form);
+        
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        // Validate form
+        if (!this.validateLoginForm(email, password)) {
+            return;
+        }
+
+        this.setProcessing(true, 'Signing you in...');
+
+        try {
+            const response = await this.apiRequest('/api/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
             });
-        }, 10);
+
+            if (response.success) {
+                this.handleAuthSuccess(response.user, response.token);
+            } else {
+                this.showError('Invalid email or password. Please try again.');
+            }
+
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showError('Unable to sign in. Please check your connection and try again.');
+        } finally {
+            this.setProcessing(false);
+        }
     }
 
-    showProfile() {
-        this.showInfo('Profile', 'Profile management coming soon!');
+    async handleSignup(event) {
+        event.preventDefault();
+        
+        if (this.isProcessing) return;
+
+        const firstName = document.getElementById('signup-first-name').value;
+        const lastName = document.getElementById('signup-last-name').value;
+        const email = document.getElementById('signup-email').value;
+        const company = document.getElementById('signup-company').value;
+        const password = document.getElementById('signup-password').value;
+        const volume = document.getElementById('signup-volume').value;
+        const termsAgreed = document.getElementById('terms-agreement').checked;
+
+        // Validate form
+        if (!this.validateSignupForm(firstName, lastName, email, company, password, volume, termsAgreed)) {
+            return;
+        }
+
+        this.setProcessing(true, 'Creating your account...');
+
+        try {
+            const response = await this.apiRequest('/api/auth/signup', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    fullName: `${firstName} ${lastName}`,
+                    tenantName: company,
+                    tenantSubdomain: this.generateSubdomain(company),
+                    metadata: {
+                        firstName,
+                        lastName,
+                        company,
+                        monthlyVolume: volume
+                    }
+                })
+            });
+
+            if (response.success) {
+                this.handleAuthSuccess(response.user, response.token);
+            } else {
+                this.showError(response.error || 'Unable to create account. Please try again.');
+            }
+
+        } catch (error) {
+            console.error('Signup error:', error);
+            this.showError('Unable to create account. Please check your connection and try again.');
+        } finally {
+            this.setProcessing(false);
+        }
     }
 
-    showSettings() {
-        this.showInfo('Settings', 'Store settings coming soon!');
+    async handleSocialAuth(event) {
+        event.preventDefault();
+        const provider = event.currentTarget.classList.contains('google') ? 'google' : 'microsoft';
+        
+        this.showError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} authentication will be available soon. Please use email signup for now.`);
+    }
+
+    // Validation Methods
+    validateLoginForm(email, password) {
+        let isValid = true;
+
+        if (!this.isValidEmail(email)) {
+            this.showFieldError('login-email', 'Please enter a valid email address');
+            isValid = false;
+        }
+
+        if (!password || password.length < 1) {
+            this.showFieldError('login-password', 'Password is required');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    validateSignupForm(firstName, lastName, email, company, password, volume, termsAgreed) {
+        let isValid = true;
+
+        if (!firstName || firstName.length < 2) {
+            this.showFieldError('signup-first-name', 'First name must be at least 2 characters');
+            isValid = false;
+        }
+
+        if (!lastName || lastName.length < 2) {
+            this.showFieldError('signup-last-name', 'Last name must be at least 2 characters');
+            isValid = false;
+        }
+
+        if (!this.isValidEmail(email)) {
+            this.showFieldError('signup-email', 'Please enter a valid work email address');
+            isValid = false;
+        }
+
+        if (!company || company.length < 2) {
+            this.showFieldError('signup-company', 'Company name is required');
+            isValid = false;
+        }
+
+        if (!this.isValidPassword(password)) {
+            this.showFieldError('signup-password', 'Password must be at least 8 characters with letters and numbers');
+            isValid = false;
+        }
+
+        if (!volume) {
+            this.showFieldError('signup-volume', 'Please select your monthly shipping volume');
+            isValid = false;
+        }
+
+        if (!termsAgreed) {
+            this.showFieldError('terms-agreement', 'You must agree to the Terms of Service');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    validateEmail(input) {
+        const email = input.value;
+        if (email && !this.isValidEmail(email)) {
+            this.showFieldError(input.id, 'Please enter a valid email address');
+            return false;
+        }
+        this.clearError(input);
+        return true;
+    }
+
+    validatePassword(input) {
+        const password = input.value;
+        if (input.id === 'signup-password' && password) {
+            if (!this.isValidPassword(password)) {
+                this.showFieldError(input.id, 'Password must be at least 8 characters with letters and numbers');
+                return false;
+            }
+        }
+        this.clearError(input);
+        return true;
+    }
+
+    validateCompany(input) {
+        const company = input.value;
+        if (company && company.length < 2) {
+            this.showFieldError(input.id, 'Company name must be at least 2 characters');
+            return false;
+        }
+        this.clearError(input);
+        return true;
+    }
+
+    // Utility Methods
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    isValidPassword(password) {
+        // At least 8 characters, contains letters and numbers
+        return password.length >= 8 && /[a-zA-Z]/.test(password) && /[0-9]/.test(password);
+    }
+
+    generateSubdomain(companyName) {
+        return companyName
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '')
+            .substring(0, 20);
+    }
+
+    // API Methods
+    async apiRequest(endpoint, options = {}) {
+        const url = `${this.baseURL}${endpoint}`;
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            },
+            ...options
+        };
+
+        const response = await fetch(url, config);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        return await response.json();
+    }
+
+    // Success Handler
+    handleAuthSuccess(user, token) {
+        // Store authentication data
+        localStorage.setItem('deckstack_token', token);
+        localStorage.setItem('deckstack_user', JSON.stringify(user));
+
+        // Show success message
+        this.showSuccess('Welcome to DeckStack! Redirecting to your dashboard...');
+
+        // Redirect to main application
+        setTimeout(() => {
+            window.location.href = '/index.html';
+        }, 2000);
+    }
+
+    // UI Helper Methods
+    setProcessing(processing, message = 'Processing...') {
+        this.isProcessing = processing;
+        
+        const submitButtons = document.querySelectorAll('button[type="submit"]');
+        submitButtons.forEach(btn => {
+            btn.disabled = processing;
+            if (processing) {
+                btn.classList.add('loading');
+            } else {
+                btn.classList.remove('loading');
+            }
+        });
+
+        if (processing) {
+            this.showLoading(message);
+        } else {
+            this.hideLoading();
+        }
+    }
+
+    showLoading(message = 'Processing...') {
+        const overlay = document.getElementById('loading-overlay');
+        const title = document.getElementById('loading-title');
+        const messageEl = document.getElementById('loading-message');
+        
+        if (overlay) {
+            if (title) title.textContent = 'Processing...';
+            if (messageEl) messageEl.textContent = message;
+            overlay.classList.remove('hidden');
+        }
+    }
+
+    hideLoading() {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) {
+            overlay.classList.add('hidden');
+        }
     }
 
     showError(message) {
+        // Create or update error notification
         this.showNotification(message, 'error');
     }
 
-    showSuccessMessage(message) {
+    showSuccess(message) {
+        // Create or update success notification
         this.showNotification(message, 'success');
     }
 
-    showInfo(title, message) {
-        this.showNotification(`${title}: ${message}`, 'info');
-    }
-
     showNotification(message, type = 'info') {
-        // Use existing notification system from cardshop-app.js
-        if (window.cardShopApp && window.cardShopApp.showNotification) {
-            window.cardShopApp.showNotification(message, type);
-        } else {
-            alert(message); // Fallback
+        // Remove existing notifications
+        const existing = document.querySelector('.notification');
+        if (existing) {
+            existing.remove();
         }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: ${type === 'error' ? '#fee2e2' : type === 'success' ? '#d1fae5' : '#dbeafe'};
+            color: ${type === 'error' ? '#dc2626' : type === 'success' ? '#059669' : '#2563eb'};
+            border: 1px solid ${type === 'error' ? '#fecaca' : type === 'success' ? '#a7f3d0' : '#93c5fd'};
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        `;
+
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            .notification-content {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            .notification-close {
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 0.25rem;
+                margin-left: auto;
+                opacity: 0.7;
+            }
+            .notification-close:hover {
+                opacity: 1;
+            }
+        `;
+        document.head.appendChild(style);
+
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
     }
 
-    isAuthenticated() {
-        return !!(this.authToken && this.currentUser);
+    showFieldError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+
+        // Add error class
+        field.classList.add('error');
+
+        // Remove existing error message
+        const existingError = field.parentElement.querySelector('.form-error');
+        if (existingError) {
+            existingError.remove();
+        }
+
+        // Add error message
+        const errorElement = document.createElement('span');
+        errorElement.className = 'form-error';
+        errorElement.textContent = message;
+        field.parentElement.appendChild(errorElement);
     }
 
-    getAuthHeaders() {
-        return this.authToken ? {
-            'Authorization': `Bearer ${this.authToken}`,
-            'Content-Type': 'application/json'
-        } : {
-            'Content-Type': 'application/json'
-        };
+    clearError(field) {
+        field.classList.remove('error');
+        const errorElement = field.parentElement.querySelector('.form-error');
+        if (errorElement) {
+            errorElement.remove();
+        }
     }
 }
 
-// Initialize auth manager
-window.authManager = new AuthManager();
+// Global functions for navigation
+window.showLanding = () => {
+    if (window.authSystem) {
+        window.authSystem.showLanding();
+    }
+};
 
-// Add auth styles
-const authStyles = document.createElement('style');
-authStyles.textContent = `
-    .auth-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
+window.showLogin = () => {
+    if (window.authSystem) {
+        window.authSystem.showLogin();
     }
-    
-    .auth-modal.show {
-        opacity: 1;
-        visibility: visible;
-    }
-    
-    .auth-modal-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-    
-    .auth-modal-content {
-        background: white;
-        border-radius: 12px;
-        padding: 32px;
-        max-width: 400px;
-        width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-    
-    .auth-header {
-        text-align: center;
-        margin-bottom: 24px;
-    }
-    
-    .auth-header h2 {
-        margin: 0 0 8px 0;
-        color: var(--text-primary);
-    }
-    
-    .auth-header p {
-        margin: 0;
-        color: var(--text-muted);
-    }
-    
-    .auth-form {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-    }
-    
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    
-    .form-group label {
-        font-weight: 500;
-        color: var(--text-primary);
-    }
-    
-    .form-group input {
-        padding: 12px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        font-size: 14px;
-    }
-    
-    .form-group input:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    .form-group small {
-        color: var(--text-muted);
-        font-size: 12px;
-    }
-    
-    .url-input {
-        display: flex;
-        align-items: center;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        overflow: hidden;
-    }
-    
-    .url-input input {
-        border: none;
-        flex: 1;
-        padding: 12px;
-    }
-    
-    .url-input span {
-        background: var(--gray-50);
-        padding: 12px;
-        color: var(--text-muted);
-        font-size: 14px;
-    }
-    
-    .subdomain-status {
-        font-size: 12px;
-        margin-top: 4px;
-    }
-    
-    .subdomain-status.available {
-        color: var(--success-color);
-    }
-    
-    .subdomain-status.unavailable {
-        color: var(--danger-color);
-    }
-    
-    .auth-footer {
-        text-align: center;
-        margin-top: 24px;
-        padding-top: 24px;
-        border-top: 1px solid var(--border-color);
-    }
-    
-    .auth-footer p {
-        margin: 8px 0;
-        color: var(--text-muted);
-    }
-    
-    .auth-footer a {
-        color: var(--primary-color);
-        text-decoration: none;
-    }
-    
-    .auth-footer a:hover {
-        text-decoration: underline;
-    }
-    
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 8px 12px;
-        background: var(--gray-50);
-        border-radius: 8px;
-    }
-    
-    .user-avatar {
-        width: 32px;
-        height: 32px;
-        background: var(--primary-color);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-    }
-    
-    .user-details {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-    
-    .user-name {
-        font-weight: 500;
-        font-size: 14px;
-        color: var(--text-primary);
-    }
-    
-    .user-role {
-        font-size: 12px;
-        color: var(--text-muted);
-    }
-    
-    .user-menu-dropdown {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        border: 1px solid var(--border-color);
-        min-width: 160px;
-        z-index: 1001;
-    }
-    
-    .menu-item {
-        padding: 12px 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        color: var(--text-primary);
-        font-size: 14px;
-    }
-    
-    .menu-item:hover {
-        background: var(--gray-50);
-    }
-    
-    .menu-divider {
-        height: 1px;
-        background: var(--border-color);
-        margin: 4px 0;
-    }
-    
-    .text-success {
-        color: var(--success-color);
-    }
-    
-    .text-danger {
-        color: var(--danger-color);
-    }
-`;
+};
 
-document.head.appendChild(authStyles);
+window.showSignup = () => {
+    if (window.authSystem) {
+        window.authSystem.showSignup();
+    }
+};
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.authSystem = new AuthSystem();
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', (e) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const view = urlParams.get('view') || 'landing';
+        
+        if (window.authSystem) {
+            window.authSystem.showSection(view);
+        }
+    });
+
+    // Check for initial view from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialView = urlParams.get('view');
+    if (initialView && ['login', 'signup'].includes(initialView)) {
+        window.authSystem.showSection(initialView);
+    }
+});

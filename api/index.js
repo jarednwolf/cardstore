@@ -179,6 +179,109 @@ app.get('/api/v1/shipping/carriers', (req, res) => {
   ]);
 });
 
+// Authentication endpoints
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  // Demo authentication - in production, this would validate against a real database
+  if (email && password) {
+    const user = {
+      id: 'demo-user-' + Date.now(),
+      email: email,
+      name: email.split('@')[0],
+      role: 'owner',
+      tenantId: 'demo-tenant',
+      isActive: true,
+      lastLoginAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    const token = 'demo-jwt-token-' + Date.now();
+    
+    res.json({
+      success: true,
+      user: user,
+      token: token,
+      message: 'Login successful'
+    });
+  } else {
+    res.status(400).json({
+      success: false,
+      error: 'Email and password are required'
+    });
+  }
+});
+
+app.post('/api/auth/signup', (req, res) => {
+  const { email, password, fullName, tenantName, tenantSubdomain, metadata } = req.body;
+  
+  // Demo signup - in production, this would create real user and tenant records
+  if (email && password && fullName) {
+    const user = {
+      id: 'demo-user-' + Date.now(),
+      email: email,
+      name: fullName,
+      role: 'owner',
+      tenantId: 'demo-tenant-' + Date.now(),
+      isActive: true,
+      lastLoginAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    const token = 'demo-jwt-token-' + Date.now();
+    
+    res.json({
+      success: true,
+      user: user,
+      token: token,
+      message: 'Account created successfully'
+    });
+  } else {
+    res.status(400).json({
+      success: false,
+      error: 'Email, password, and full name are required'
+    });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Logged out successfully'
+  });
+});
+
+app.get('/api/auth/me', (req, res) => {
+  const authHeader = req.headers.authorization;
+  
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    // Demo user info - in production, this would validate the token and return real user data
+    const user = {
+      id: 'demo-user',
+      email: 'demo@deckstack.com',
+      name: 'Demo User',
+      role: 'owner',
+      tenantId: 'demo-tenant',
+      isActive: true,
+      lastLoginAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    res.json({
+      success: true,
+      user: user
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      error: 'Authentication required'
+    });
+  }
+});
+
 // Orders endpoint
 app.get('/api/v1/orders', (req, res) => {
   res.json({

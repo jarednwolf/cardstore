@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeckStack - Professional Shipping Automation</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/auth.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <!-- Header -->
+        <header class="auth-header">
+            <div class="logo">
+                <i class="fas fa-layer-group"></i>
+                <h1>DeckStack</h1>
+            </div>
+            <p class="tagline">Stack the deck in your favor with automated shipping</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="auth-main">
+            <!-- Landing Section -->
+            <section id="landing-section" class="auth-section active">
+                <div class="hero-content">
+                    <h2>Professional Shipping Automation</h2>
+                    <p class="hero-description">
+                        Streamline your e-commerce fulfillment with enterprise-grade shipping automation. 
+                        Connect multiple carriers, automate label creation, and scale your business operations.
+                    </p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <i class="fas fa-shipping-fast"></i>
+                            <h3>Multi-Carrier Integration</h3>
+                            <p>USPS, UPS, FedEx, and DHL in one platform</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-robot"></i>
+                            <h3>Automated Processing</h3>
+                            <p>One-click label creation and batch processing</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Analytics & Insights</h3>
+                            <p>Track performance and optimize operations</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>Enterprise Security</h3>
+                            <p>SOC 2 compliant with 99.9% uptime</p>
+                        </div>
+                    </div>
+
+                    <div class="cta-buttons">
+                        <button class="btn primary large" onclick="showSignup()">
+                            <i class="fas fa-rocket"></i>
+                            Start Free Trial
+                        </button>
+                        <button class="btn secondary large" onclick="showLogin()">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Sign In
+                        </button>
+                    </div>
+
+                    <div class="trust-indicators">
+                        <div class="trust-item">
+                            <i class="fas fa-users"></i>
+                            <span>10,000+ businesses trust DeckStack</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="fas fa-box"></i>
+                            <span>1M+ packages shipped monthly</span>
+                        </div>
+                        <div class="trust-item">
+                            <i class="fas fa-clock"></i>
+                            <span>5 minutes average setup time</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Login Section -->
+            <section id="login-section" class="auth-section">
+                <div class="auth-form-container">
+                    <div class="auth-form-header">
+                        <h2>Welcome Back</h2>
+                        <p>Sign in to your DeckStack account</p>
+                    </div>
+
+                    <form id="login-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="login-email" class="form-label">Email Address</label>
+                            <input type="email" id="login-email" class="form-input" placeholder="your@company.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="login-password" class="form-label">Password</label>
+                            <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required>
+                        </div>
+
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="remember-me">
+                                <span class="checkmark"></span>
+                                Remember me
+                            </label>
+                            <a href="#" class="forgot-password">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="btn primary full-width">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Sign In
+                        </button>
+                    </form>
+
+                    <div class="auth-divider">
+                        <span>or continue with</span>
+                    </div>
+
+                    <div class="social-auth">
+                        <button class="btn social google">
+                            <i class="fab fa-google"></i>
+                            Google
+                        </button>
+                        <button class="btn social microsoft">
+                            <i class="fab fa-microsoft"></i>
+                            Microsoft
+                        </button>
+                    </div>
+
+                    <div class="auth-footer">
+                        <p>Don't have an account? <a href="#" onclick="showSignup()">Sign up for free</a></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Signup Section -->
+            <section id="signup-section" class="auth-section">
+                <div class="auth-form-container">
+                    <div class="auth-form-header">
+                        <h2>Start Your Free Trial</h2>
+                        <p>Join thousands of businesses automating their shipping</p>
+                    </div>
+
+                    <form id="signup-form" class="auth-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="signup-first-name" class="form-label">First Name</label>
+                                <input type="text" id="signup-first-name" class="form-input" placeholder="John" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signup-last-name" class="form-label">Last Name</label>
+                                <input type="text" id="signup-last-name" class="form-input" placeholder="Doe" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-email" class="form-label">Work Email</label>
+                            <input type="email" id="signup-email" class="form-input" placeholder="john@company.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-company" class="form-label">Company Name</label>
+                            <input type="text" id="signup-company" class="form-input" placeholder="Your Company Inc." required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-password" class="form-label">Password</label>
+                            <input type="password" id="signup-password" class="form-input" placeholder="Create a secure password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-volume" class="form-label">Monthly Shipping Volume</label>
+                            <select id="signup-volume" class="form-select" required>
+                                <option value="">Select volume range</option>
+                                <option value="1-50">1-50 packages</option>
+                                <option value="51-200">51-200 packages</option>
+                                <option value="201-500">201-500 packages</option>
+                                <option value="501-1000">501-1000 packages</option>
+                                <option value="1000+">1000+ packages</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="terms-agreement" required>
+                                <span class="checkmark"></span>
+                                I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn primary full-width">
+                            <i class="fas fa-rocket"></i>
+                            Start Free Trial
+                        </button>
+                    </form>
+
+                    <div class="auth-divider">
+                        <span>or continue with</span>
+                    </div>
+
+                    <div class="social-auth">
+                        <button class="btn social google">
+                            <i class="fab fa-google"></i>
+                            Google
+                        </button>
+                        <button class="btn social microsoft">
+                            <i class="fab fa-microsoft"></i>
+                            Microsoft
+                        </button>
+                    </div>
+
+                    <div class="auth-footer">
+                        <p>Already have an account? <a href="#" onclick="showLogin()">Sign in</a></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="auth-footer-main">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#">About</a>
+                    <a href="#">Pricing</a>
+                    <a href="#">Support</a>
+                    <a href="#">Documentation</a>
+                    <a href="#">Status</a>
+                </div>
+                <div class="footer-copy">
+                    <p>&copy; 2024 DeckStack. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="spinner-large"></div>
+            <h3 id="loading-title">Processing...</h3>
+            <p id="loading-message">Please wait while we set up your account.</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+</body>
+</html>

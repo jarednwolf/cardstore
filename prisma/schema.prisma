@@ -31,6 +31,10 @@ model Tenant {
   orders            Order[]
   stockMovements    StockMovement[]
   users             User[]
+  inventoryReservations InventoryReservation[]
+  inventoryTransfers InventoryTransfer[]
+  shopifyInventorySyncs ShopifyInventorySync[]
+  apiCallLogs ApiCallLog[]
 
   @@map("tenants")
 }
@@ -49,6 +53,10 @@ model User {
   // Relations
   tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   stockMovements StockMovement[]
+  inventoryReservations InventoryReservation[]
+  transfersCreated InventoryTransfer[] @relation("TransferCreator")
+  transfersCompleted InventoryTransfer[] @relation("TransferCompleter")
+  apiCallLogs ApiCallLog[]
 
   @@index([tenantId])
   @@map("users")
@@ -109,6 +117,9 @@ model ProductVariant {
   orderLineItems  OrderLineItem[]
   stockMovements  StockMovement[]
   channelPrices   ChannelPrice[]
+  inventoryReservations InventoryReservation[]
+  inventoryTransfers InventoryTransfer[]
+  shopifyInventorySyncs ShopifyInventorySync[]
 
   @@index([tenantId])
   @@index([productId])
@@ -135,6 +146,10 @@ model InventoryLocation {
   tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   inventoryItems InventoryItem[]
   stockMovements StockMovement[]
+  inventoryReservations InventoryReservation[]
+  transfersFrom InventoryTransfer[] @relation("TransferFrom")
+  transfersTo InventoryTransfer[] @relation("TransferTo")
+  shopifyInventorySyncs ShopifyInventorySync[]
 
   @@index([tenantId])
   @@map("inventory_locations")
@@ -223,6 +238,7 @@ model Order {
   // Relations
   tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   lineItems OrderLineItem[]
+  inventoryReservations InventoryReservation[]
 
   @@unique([tenantId, orderNumber])
   @@index([tenantId, status])
@@ -302,4 +318,116 @@ model WebhookLog {
   @@index([source, topic])
   @@index([processed])
   @@map("webhook_logs")
+}
+
+// =============================================================================
+// ADVANCED INVENTORY MANAGEMENT TABLES
+// =============================================================================
+
+model InventoryReservation {
+  id         String   @id @default(cuid())
+  tenantId   String   @map("tenant_id")
+  variantId  String   @map("variant_id")
+  locationId String   @map("location_id")
+  orderId    String   @map("order_id")
+  quantity   Int
+  status     String   @default("active") // active, expired, cancelled, fulfilled
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  createdBy  String   @map("created_by")
+
+  // Relations
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variant  ProductVariant    @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  location InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  order    Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user     User              @relation(fields: [createdBy], references: [id])
+
+  @@index([tenantId])
+  @@index([expiresAt, status])
+  @@index([orderId])
+  @@index([variantId, locationId])
+  @@map("inventory_reservations")
+}
+
+model InventoryTransfer {
+  id             String   @id @default(cuid())
+  tenantId       String   @map("tenant_id")
+  variantId      String   @map("variant_id")
+  fromLocationId String   @map("from_location_id")
+  toLocationId   String   @map("to_location_id")
+  quantity       Int
+  status         String   @default("pending") // pending, in_transit, completed, cancelled
+  reason         String
+  reference      String?
+  notes          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  completedAt    DateTime? @map("completed_at")
+  createdBy      String   @map("created_by")
+  completedBy    String?  @map("completed_by")
+
+  // Relations
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variant      ProductVariant    @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  fromLocation InventoryLocation @relation("TransferFrom", fields: [fromLocationId], references: [id])
+  toLocation   InventoryLocation @relation("TransferTo", fields: [toLocationId], references: [id])
+  creator      User              @relation("TransferCreator", fields: [createdBy], references: [id])
+  completer    User?             @relation("TransferCompleter", fields: [completedBy], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([variantId])
+  @@map("inventory_transfers")
+}
+
+model ShopifyInventorySync {
+  id                String   @id @default(cuid())
+  tenantId          String   @map("tenant_id")
+  variantId         String   @map("variant_id")
+  shopifyVariantId  String   @map("shopify_variant_id")
+  locationId        String   @map("location_id")
+  shopifyLocationId String   @map("shopify_location_id")
+  syncType          String   // to_shopify, from_shopify
+  previousQuantity  Int      @map("previous_quantity")
+  newQuantity       Int      @map("new_quantity")
+  status            String   // pending, completed, failed
+  errorMessage      String?  @map("error_message")
+  retryCount        Int      @default(0) @map("retry_count")
+  syncedAt          DateTime @default(now()) @map("synced_at")
+
+  // Relations
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variant  ProductVariant    @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  location InventoryLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([syncedAt])
+  @@index([status])
+  @@index([variantId, locationId])
+  @@map("shopify_inventory_syncs")
+}
+
+model ApiCallLog {
+  id            String   @id @default(cuid())
+  tenantId      String   @map("tenant_id")
+  userId        String?  @map("user_id")
+  method        String
+  endpoint      String
+  statusCode    Int      @map("status_code")
+  responseTime  Int      @map("response_time")
+  userAgent     String?  @map("user_agent")
+  ipAddress     String?  @map("ip_address")
+  correlationId String?  @map("correlation_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@index([endpoint])
+  @@index([statusCode])
+  @@map("api_call_logs")
 }

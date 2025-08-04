@@ -3,13 +3,34 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
 import { logger } from '../config/logger';
 import { UnauthorizedError, ForbiddenError } from './errorHandler';
-import { JWTPayload, User } from '../types';
+import { JWTPayload, User, RequestContext } from '../types';
 import { authService } from '../services/authService';
 import { isSupabaseConfigured } from '../config/supabase';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface AuthenticatedRequest extends Request {
   user?: User;
   tenantId?: string;
+  context?: RequestContext;
+}
+
+/**
+ * Create a RequestContext from authenticated request
+ */
+export function createRequestContext(req: AuthenticatedRequest): RequestContext {
+  if (!req.user || !req.tenantId) {
+    throw new UnauthorizedError('User context not available');
+  }
+
+  return {
+    userId: req.user.id,
+    tenantId: req.tenantId,
+    userRole: req.user.role,
+    correlationId: req.headers['x-correlation-id'] as string || uuidv4(),
+    userAgent: req.headers['user-agent'] || undefined,
+    ipAddress: req.ip || req.connection.remoteAddress || undefined,
+    timestamp: new Date()
+  };
 }
 
 export const authMiddleware = async (
@@ -32,9 +53,11 @@ export const authMiddleware = async (
         updatedAt: new Date(),
       };
       req.tenantId = req.headers['x-tenant-id'] as string;
+      req.context = createRequestContext(req);
       
       logger.debug('Development auth bypass', {
         tenantId: req.tenantId,
+        correlationId: req.context.correlationId
       });
       
       return next();
@@ -63,9 +86,11 @@ export const authMiddleware = async (
         updatedAt: new Date(),
       };
       req.tenantId = tenantId;
+      req.context = createRequestContext(req);
       
       logger.debug('Demo token auth bypass', {
         tenantId: req.tenantId,
+        correlationId: req.context.correlationId
       });
       
       return next();
@@ -82,11 +107,13 @@ export const authMiddleware = async (
         
         req.user = user;
         req.tenantId = user.tenantId;
+        req.context = createRequestContext(req);
         
         logger.debug('User authenticated via Supabase', {
           userId: user.id,
           tenantId: user.tenantId,
           role: user.role,
+          correlationId: req.context.correlationId
         });
         
         next();
@@ -113,11 +140,13 @@ export const authMiddleware = async (
         };
         
         req.tenantId = decoded.tenantId;
+        req.context = createRequestContext(req);
         
         logger.debug('User authenticated via JWT fallback', {
           userId: decoded.userId,
           tenantId: decoded.tenantId,
           roles: decoded.roles,
+          correlationId: req.context.correlationId
         });
         
         next();

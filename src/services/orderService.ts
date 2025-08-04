@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../config/logger';
+import { getTenantCurrency } from '../utils/currency';
 import {
   Order,
   OrderLineItem,
@@ -79,7 +80,7 @@ export class OrderService {
       const orderNumber = await this.generateOrderNumber(context.tenantId);
 
       // Calculate totals
-      const { subtotalPrice, totalPrice } = this.calculateOrderTotals(data.lineItems);
+      const { subtotalPrice, totalTax, totalShipping, totalPrice } = this.calculateOrderTotals(data.lineItems);
 
       // Create order with line items in transaction
       const order = await this.prisma.$transaction(async (tx: any) => {
@@ -96,10 +97,10 @@ export class OrderService {
             financialStatus: 'pending',
             fulfillmentStatus: 'unfulfilled',
             subtotalPrice,
-            totalTax: 0, // Will be calculated based on tax rules
-            totalShipping: 0, // Will be calculated based on shipping rules
+            totalTax,
+            totalShipping,
             totalPrice,
-            currency: 'USD',
+            currency: await getTenantCurrency(this.prisma, context.tenantId),
             shippingAddress: data.shippingAddress ? JSON.stringify(data.shippingAddress) : undefined,
             billingAddress: data.billingAddress ? JSON.stringify(data.billingAddress) : undefined,
             tags: JSON.stringify([]),
@@ -199,19 +200,22 @@ export class OrderService {
       correlationId: context.correlationId
     });
 
+    const updateData: any = {
+      updatedAt: new Date()
+    };
+    
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.financialStatus !== undefined) updateData.financialStatus = data.financialStatus;
+    if (data.fulfillmentStatus !== undefined) updateData.fulfillmentStatus = data.fulfillmentStatus;
+    if (data.notes !== undefined) updateData.notes = data.notes;
+    if (data.tags !== undefined) updateData.tags = JSON.stringify(data.tags);
+
     const updatedOrder = await this.prisma.order.update({
       where: {
         id: orderId,
         tenantId: context.tenantId
       },
-      data: {
-        status: data.status,
-        financialStatus: data.financialStatus,
-        fulfillmentStatus: data.fulfillmentStatus,
-        notes: data.notes,
-        tags: data.tags ? JSON.stringify(data.tags) : undefined,
-        updatedAt: new Date()
-      },
+      data: updateData,
       include: {
         lineItems: {
           include: {
@@ -302,13 +306,16 @@ export class OrderService {
 
     const transformedOrders = orders.map((order: any) => this.transformOrderFromDb(order));
 
+    const startCursor = orders.length > 0 ? orders[0]?.id : undefined;
+    const endCursor = orders.length > 0 ? orders[orders.length - 1]?.id : undefined;
+
     return {
       orders: transformedOrders,
       pagination: {
         hasNextPage: orders.length === take,
         hasPreviousPage: skip > 0,
-        startCursor: orders.length > 0 ? orders[0].id : undefined,
-        endCursor: orders.length > 0 ? orders[orders.length - 1].id : undefined,
+        startCursor,
+        endCursor,
         totalCount
       }
     };
@@ -356,25 +363,13 @@ export class OrderService {
       // Process reservations
       for (const reservation of reservations) {
         try {
-          // TODO: Implement proper inventory reservation
-          // For now, just check if inventory is available
-          const availableInventory = await this.inventoryService.getInventory(
-            context.tenantId,
-            reservation.variantId,
-            reservation.locationId
-          );
+          // Use the new inventory reservation system
+          const reservationResult = await this.inventoryService.reserveInventory([reservation], context);
           
-          const totalAvailable = availableInventory.reduce((sum, item) => sum + item.available, 0);
-          
-          if (totalAvailable >= reservation.quantity) {
-            const result: ReservationResult = {
-              success: true,
-              reservationId: `res-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              availableQuantity: totalAvailable
-            };
-            reservationResults.push(result);
+          if (reservationResult[0]?.success) {
+            reservationResults.push(reservationResult[0]);
           } else {
-            throw new Error(`Insufficient inventory: ${totalAvailable} available, ${reservation.quantity} requested`);
+            throw new Error(reservationResult[0]?.error || 'Reservation failed');
           }
         } catch (error) {
           const errorMsg = `Failed to reserve inventory for variant ${reservation.variantId}: ${error instanceof Error ? error.message : 'Unknown error'}`;
@@ -382,7 +377,8 @@ export class OrderService {
           logger.error('Inventory reservation failed', {
             orderId,
             variantId: reservation.variantId,
-            error: errorMsg
+            error: errorMsg,
+            correlationId: context.correlationId
           });
         }
       }
@@ -478,7 +474,7 @@ export class OrderService {
 
     // Process inventory updates outside transaction
     if (inventoryUpdates.length > 0) {
-      await this.inventoryService.updateInventory(context.tenantId, inventoryUpdates);
+      await this.inventoryService.updateInventory(inventoryUpdates, context);
     }
 
     // Update order status in separate transaction
@@ -532,8 +528,28 @@ export class OrderService {
     });
 
     await this.prisma.$transaction(async (tx: any) => {
+      // Get order details for reservation release
+      const order = await tx.order.findUnique({
+        where: { id: orderId },
+        include: { lineItems: true }
+      });
+
+      if (order && order.tenantId !== context.tenantId) {
+        throw new Error('Order not found or access denied');
+      }
+
       // Release any inventory reservations
-      // TODO: Implement reservation release logic
+      if (order?.lineItems) {
+        logger.info('Releasing inventory reservations for cancelled order', {
+          orderId,
+          lineItemCount: order.lineItems.length,
+          userId: context.userId,
+          correlationId: context.correlationId
+        });
+        
+        // Release reservations by order ID
+        await this.inventoryService.releaseReservationsByOrder(orderId, context);
+      }
 
       // Update order status
       await tx.order.update({
@@ -600,7 +616,7 @@ export class OrderService {
               reason: 'return',
               reference: orderId
             };
-            await this.inventoryService.updateInventory(context.tenantId, [inventoryUpdate]);
+            await this.inventoryService.updateInventory([inventoryUpdate], context);
           }
         }
       }
@@ -668,9 +684,27 @@ export class OrderService {
     if (existingOrder) {
       logger.info('Order already exists, updating', {
         orderId: existingOrder.id,
-        externalOrderId
+        externalOrderId,
+        userId: context.userId,
+        correlationId: context.correlationId
       });
-      // TODO: Implement order update logic
+      
+      // Update existing order with new data
+      const updatedOrder = await this.prisma.order.update({
+        where: { id: existingOrder.id },
+        data: {
+          channelData: JSON.stringify(orderData),
+          updatedAt: new Date()
+        }
+      });
+      
+      logger.info('Order updated from channel sync', {
+        orderId: existingOrder.id,
+        channel,
+        userId: context.userId,
+        correlationId: context.correlationId
+      });
+      
       return this.getOrderById(existingOrder.id, context);
     }
 
@@ -727,10 +761,30 @@ export class OrderService {
       0
     );
 
-    // TODO: Implement tax and shipping calculation
-    const totalPrice = subtotalPrice;
+    // Calculate tax and shipping (basic implementation - will be enhanced)
+    const taxRate = 0.08; // 8% default tax rate - should come from tenant settings
+    const totalTax = subtotalPrice * taxRate;
+    const totalShipping = this.calculateBasicShipping(lineItems);
+    const totalPrice = subtotalPrice + totalTax + totalShipping;
 
-    return { subtotalPrice, totalPrice };
+    return {
+      subtotalPrice,
+      totalTax,
+      totalShipping,
+      totalPrice
+    };
+  }
+
+  /**
+   * Calculate basic shipping cost
+   */
+  private calculateBasicShipping(lineItems: Array<{ quantity: number; price: number }>): number {
+    // Basic shipping calculation - $5 base + $1 per item
+    const baseShipping = 5.00;
+    const perItemShipping = 1.00;
+    const totalItems = lineItems.reduce((sum, item) => sum + item.quantity, 0);
+    
+    return baseShipping + (totalItems * perItemShipping);
   }
 
   /**

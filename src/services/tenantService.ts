@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../config/logger';
 import { Tenant, User } from '../types';
+import { getApiCallCount } from '../middleware/apiTracking';
 
 const prisma = new PrismaClient();
 
@@ -406,7 +407,7 @@ export class TenantService {
         orderCount,
         monthlyOrderValue: monthlyOrders._sum.totalPrice || 0,
         storageUsed: 0, // TODO: Calculate actual storage usage
-        apiCallsThisMonth: 0, // TODO: Implement API call tracking
+        apiCallsThisMonth: await this.getApiCallsThisMonth(tenantId),
         lastActivity: lastActivity?.lastLoginAt || new Date()
       };
     } catch (error) {
@@ -540,6 +541,19 @@ export class TenantService {
       createdAt: tenant.createdAt,
       updatedAt: tenant.updatedAt
     };
+  }
+
+  /**
+   * Get API calls for current month
+   */
+  private async getApiCallsThisMonth(tenantId: string): Promise<number> {
+    try {
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      return await getApiCallCount(tenantId, startOfMonth);
+    } catch (error) {
+      logger.error('Failed to get API calls this month', { error, tenantId });
+      return 0;
+    }
   }
 }
 

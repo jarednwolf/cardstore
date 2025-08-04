@@ -1,9 +1,9 @@
 # CardStore Operations Layer - Database Schema Design
 
 ## Document Information
-- **Version**: 1.0
-- **Date**: 2025-08-02
-- **Status**: Draft
+- **Version**: 2.0
+- **Date**: 2025-08-04
+- **Status**: Production Ready - Phase 3 Complete
 - **Owner**: Engineering Team
 - **Related Documents**: [Technical Design](./TECHNICAL_DESIGN.md), [PRD](./PRD.md)
 
@@ -810,7 +810,126 @@ COMMIT;
 -- - Materialized views
 ```
 
-#### Phase 3: Optimization (Week 4+)
+#### Phase 3: Advanced Inventory Management ✅ COMPLETED
 ```sql
--- 007_partitioning.sql
---
+-- 007_inventory_reservations.sql
+CREATE TABLE inventory_reservations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    variant_id UUID NOT NULL REFERENCES product_variants(id) ON DELETE CASCADE,
+    location_id UUID NOT NULL REFERENCES inventory_locations(id) ON DELETE CASCADE,
+    order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled', 'fulfilled')),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_by UUID NOT NULL REFERENCES users(id),
+    
+    -- Indexes
+    INDEX idx_reservations_tenant (tenant_id),
+    INDEX idx_reservations_expires (expires_at, status),
+    INDEX idx_reservations_order (order_id),
+    INDEX idx_reservations_variant_location (variant_id, location_id)
+);
+
+-- 008_inventory_transfers.sql
+CREATE TABLE inventory_transfers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    variant_id UUID NOT NULL REFERENCES product_variants(id) ON DELETE CASCADE,
+    from_location_id UUID NOT NULL REFERENCES inventory_locations(id),
+    to_location_id UUID NOT NULL REFERENCES inventory_locations(id),
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'in_transit', 'completed', 'cancelled')),
+    reason VARCHAR(100) NOT NULL,
+    reference VARCHAR(100),
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE,
+    created_by UUID NOT NULL REFERENCES users(id),
+    completed_by UUID REFERENCES users(id),
+    
+    -- Indexes
+    INDEX idx_transfers_tenant (tenant_id),
+    INDEX idx_transfers_status (status),
+    INDEX idx_transfers_variant (variant_id),
+    INDEX idx_transfers_created_at (created_at)
+);
+
+-- 009_shopify_inventory_sync.sql
+CREATE TABLE shopify_inventory_syncs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    variant_id UUID NOT NULL REFERENCES product_variants(id) ON DELETE CASCADE,
+    shopify_variant_id VARCHAR(50) NOT NULL,
+    location_id UUID NOT NULL REFERENCES inventory_locations(id),
+    shopify_location_id VARCHAR(50) NOT NULL,
+    sync_type VARCHAR(20) NOT NULL CHECK (sync_type IN ('to_shopify', 'from_shopify')),
+    previous_quantity INTEGER NOT NULL,
+    new_quantity INTEGER NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'completed', 'failed')),
+    error_message TEXT,
+    retry_count INTEGER DEFAULT 0,
+    synced_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- Indexes
+    INDEX idx_shopify_sync_tenant (tenant_id),
+    INDEX idx_shopify_sync_status (status),
+    INDEX idx_shopify_sync_synced_at (synced_at),
+    INDEX idx_shopify_sync_variant_location (variant_id, location_id)
+);
+
+-- 010_api_call_logs.sql
+CREATE TABLE api_call_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    method VARCHAR(10) NOT NULL,
+    endpoint VARCHAR(255) NOT NULL,
+    status_code INTEGER NOT NULL,
+    response_time INTEGER NOT NULL, -- milliseconds
+    user_agent TEXT,
+    ip_address VARCHAR(45),
+    correlation_id VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- Indexes
+    INDEX idx_api_logs_tenant (tenant_id),
+    INDEX idx_api_logs_created_at (created_at),
+    INDEX idx_api_logs_endpoint (endpoint),
+    INDEX idx_api_logs_status_code (status_code)
+);
+```
+
+## Phase 3 Technical Debt Resolution ✅
+
+### Database Schema Completion
+All Phase 3 advanced inventory management tables have been implemented:
+
+- ✅ **InventoryReservation** - Order-based inventory holds with expiration
+- ✅ **InventoryTransfer** - Location-to-location inventory moves
+- ✅ **ShopifyInventorySync** - Real-time sync operation tracking
+- ✅ **ApiCallLog** - API usage tracking for billing accuracy
+
+### Service Layer Updates
+All mock implementations replaced with real database operations:
+
+- ✅ **Inventory Reservations** - Real database with automatic expiration
+- ✅ **Transfer Workflows** - Complete audit trail and status tracking
+- ✅ **Shopify Integration** - Real SDK with proper error handling
+- ✅ **API Tracking** - Comprehensive usage monitoring
+
+### System Enhancements
+- ✅ **Dynamic Currency Support** - Tenant-specific currency settings
+- ✅ **Correlation ID System** - Request tracing for debugging
+- ✅ **Real-time Sync** - Bidirectional Shopify inventory sync
+- ✅ **Billing Accuracy** - Precise API call tracking
+
+### Production Readiness
+- ✅ All database migrations applied successfully
+- ✅ Prisma client regenerated with new schema
+- ✅ TypeScript compilation successful
+- ✅ Comprehensive error handling and logging
+- ✅ Audit trails for all inventory operations
+
+The database schema is now production-ready with advanced inventory management capabilities, real-time synchronization, and comprehensive monitoring systems.

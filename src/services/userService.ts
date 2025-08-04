@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../config/logger';
-import { User } from '../types';
+import { User, RequestContext } from '../types';
 import { authService } from './authService';
 
 const prisma = new PrismaClient();
@@ -94,7 +94,7 @@ export class UserService {
           email: data.email,
           role: data.role,
           tenantId: data.tenantId,
-          invitedBy: 'system' // TODO: Get from context
+          invitedBy: context?.userId || 'system'
         });
       }
 
@@ -323,8 +323,8 @@ export class UserService {
         throw new Error(result.error || 'Failed to create invitation');
       }
 
-      // TODO: Send email invitation
-      logger.info('User invitation sent', {
+      // Email invitation will be implemented in next phase
+      logger.info('User invitation created (email sending pending)', {
         email: invitation.email,
         tenantId: invitation.tenantId,
         role: invitation.role,

@@ -21,8 +21,8 @@ export interface APIError {
 export interface PaginationMeta {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
-  startCursor?: string;
-  endCursor?: string;
+  startCursor?: string | undefined;
+  endCursor?: string | undefined;
   totalCount?: number;
 }
 
@@ -505,11 +505,13 @@ export interface JWTPayload {
 
 // HTTP types
 export interface RequestContext {
-  userId?: string;
+  userId: string;
   tenantId: string;
+  userRole: string;
   correlationId: string;
-  userAgent?: string;
-  ipAddress?: string;
+  userAgent?: string | undefined;
+  ipAddress?: string | undefined;
+  timestamp?: Date;
 }
 
 // Configuration types

@@ -2,8 +2,15 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { asyncHandler } from '../middleware/errorHandler';
 import { InventoryService } from '../services/inventoryService';
-import { InventoryUpdate } from '../types';
+import { InventoryUpdate, RequestContext } from '../types';
 import { logger } from '../config/logger';
+import { createRequestContext, AuthenticatedRequest } from '../middleware/auth';
+import { TenantRequest } from '../middleware/tenant';
+import { getCurrencyFromSettings } from '../utils/currency';
+
+interface InventoryRequest extends TenantRequest {
+  context?: RequestContext;
+}
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -170,11 +177,12 @@ router.put('/:variantId/locations/:locationId', asyncHandler(async (req: Request
     });
   }
 
+  const context = createRequestContext(req as AuthenticatedRequest);
   const inventoryItem = await inventoryService.setInventoryLevel(
-    tenantId,
     variantId,
     locationId,
     quantity,
+    context,
     reason
   );
 
@@ -220,7 +228,8 @@ router.patch('/:variantId', asyncHandler(async (req: Request, res: Response) => 
     reference: update.reference,
   }));
 
-  await inventoryService.updateInventory(tenantId, inventoryUpdates);
+  const context = createRequestContext(req as AuthenticatedRequest);
+  await inventoryService.updateInventory(inventoryUpdates, context);
 
   res.json({
     data: {
@@ -261,7 +270,8 @@ router.post('/bulk', asyncHandler(async (req: Request, res: Response) => {
     };
   });
 
-  const result = await inventoryService.bulkUpdateInventory(tenantId, inventoryUpdates);
+  const context = createRequestContext(req as AuthenticatedRequest);
+  const result = await inventoryService.bulkUpdateInventory(inventoryUpdates, context);
 
   res.json({
     data: result,
@@ -438,7 +448,7 @@ router.get('/reports/value', asyncHandler(async (req: Request, res: Response) =>
       totalValue,
       totalItems,
       valueByLocation,
-      currency: 'USD', // TODO: Get from tenant settings
+      currency: getCurrencyFromSettings((req as TenantRequest).tenant?.settings),
     },
   });
 }));

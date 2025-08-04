@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../config/logger';
+import { getTenantCurrency } from '../utils/currency';
 import { env } from '../config/env';
 import {
   Order,
@@ -104,34 +105,37 @@ export class ShippingService {
         throw new Error('Order missing shipping address');
       }
 
+      // Get tenant currency
+      const currency = await getTenantCurrency(this.prisma, context.tenantId);
+
       // Mock shipping rates (in production, integrate with ShipStation/Stamps.com API)
       const rates: ShippingRate[] = [
         {
           carrier: 'usps',
           service: 'First-Class Mail',
           cost: 3.50,
-          currency: 'USD',
+          currency,
           estimatedDays: 3
         },
         {
           carrier: 'usps',
           service: 'Priority Mail',
           cost: 7.95,
-          currency: 'USD',
+          currency,
           estimatedDays: 2
         },
         {
           carrier: 'ups',
           service: 'UPS Ground',
           cost: 9.50,
-          currency: 'USD',
+          currency,
           estimatedDays: 3
         },
         {
           carrier: 'fedex',
           service: 'FedEx Ground',
           cost: 10.25,
-          currency: 'USD',
+          currency,
           estimatedDays: 3
         }
       ];
@@ -198,7 +202,7 @@ export class ShippingService {
         carrier: request.carrier,
         service: request.service,
         cost: this.calculateShippingCost(request),
-        currency: 'USD',
+        currency: await getTenantCurrency(this.prisma, context.tenantId),
         createdAt: new Date()
       };
 

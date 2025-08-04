@@ -1,11 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '@prisma/client';
 import { env } from '../config/env';
 import { logger } from '../config/logger';
 import { ForbiddenError, ValidationError } from './errorHandler';
 import { AuthenticatedRequest } from './auth';
+import { Tenant } from '../types';
+
+const prisma = new PrismaClient();
 
 export interface TenantRequest extends AuthenticatedRequest {
   tenantId: string;
+  tenant?: {
+    id: string;
+    name: string;
+    subdomain: string;
+    settings: any;
+    isActive: boolean;
+  };
 }
 
 export const tenantMiddleware = (
@@ -29,7 +40,7 @@ export const tenantMiddleware = (
 
     // 3. From query parameter (least secure, only for development)
     if (!tenantId && env.NODE_ENV === 'development') {
-      tenantId = req.query.tenantId as string;
+      tenantId = req.query['tenantId'] as string;
     }
 
     // 4. Use default tenant if none specified (for single-tenant deployments)
@@ -64,7 +75,7 @@ export const tenantMiddleware = (
 
     // Set tenant context for database queries (Row Level Security)
     // This will be used by Prisma middleware to filter queries by tenant
-    res.locals.tenantId = tenantId;
+    res.locals['tenantId'] = tenantId;
 
     logger.debug('Tenant context set', {
       tenantId,
@@ -84,21 +95,46 @@ export const validateTenant = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    // TODO: Implement tenant validation against database
-    // For now, we'll just pass through
+    const tenantId = req.tenantId;
     
-    // const tenant = await prisma.tenant.findUnique({
-    //   where: { id: req.tenantId },
-    //   select: { id: true, isActive: true }
-    // });
+    if (!tenantId) {
+      throw new ValidationError('Tenant ID is required for validation');
+    }
+
+    // Implement proper tenant validation against database
+    const tenant = await prisma.tenant.findFirst({
+      where: {
+        id: tenantId,
+        isActive: true
+      }
+    });
     
-    // if (!tenant) {
-    //   throw new NotFoundError('Tenant not found');
-    // }
+    if (!tenant) {
+      throw new ForbiddenError('Invalid or inactive tenant');
+    }
     
-    // if (!tenant.isActive) {
-    //   throw new ForbiddenError('Tenant is not active');
-    // }
+    // Check if tenant subscription is active (if billing is enabled)
+    const settings = tenant.settings ? JSON.parse(tenant.settings) : {};
+    const subscription = settings.subscription;
+    
+    if (subscription && subscription.status !== 'active') {
+      throw new ForbiddenError('Tenant subscription is not active');
+    }
+    
+    // Add tenant info to request for downstream use
+    req.tenant = {
+      id: tenant.id,
+      name: tenant.name,
+      subdomain: tenant.subdomain,
+      settings: settings,
+      isActive: tenant.isActive
+    };
+    
+    logger.debug('Tenant validated successfully', {
+      tenantId: tenant.id,
+      tenantName: tenant.name,
+      correlationId: req.headers['x-correlation-id']
+    });
 
     next();
   } catch (error) {

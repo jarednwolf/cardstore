@@ -8,6 +8,8 @@ import { logger } from './config/logger';
 import { prisma } from './config/database';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
+import { correlationIdMiddleware, correlationErrorMiddleware } from './middleware/correlationId';
+import { apiTrackingMiddleware } from './middleware/apiTracking';
 import { authMiddleware } from './middleware/auth';
 import { tenantMiddleware } from './middleware/tenant';
 
@@ -23,6 +25,9 @@ import { onboardingRoutes } from './routes/onboarding';
 import { systemRoutes } from './routes/system';
 import tenantRoutes from './routes/tenants';
 import userRoutes from './routes/users';
+import { billingRoutes } from './routes/billing';
+import { transferRoutes } from './routes/transfers';
+import { analyticsRoutes } from './routes/analytics';
 
 class Application {
   public app: express.Application;
@@ -98,8 +103,11 @@ class Application {
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-    // Request logging
-    this.app.use(requestLogger as any);
+    // Correlation ID tracking (must be first to ensure all requests have correlation IDs)
+    this.app.use(correlationIdMiddleware() as any);
+
+    // API call tracking for billing and analytics
+    this.app.use(apiTrackingMiddleware());
 
     // Trust proxy for accurate IP addresses
     this.app.set('trust proxy', 1);
@@ -137,8 +145,11 @@ class Application {
     // API routes
     apiRouter.use('/tenants', tenantRoutes);
     apiRouter.use('/users', userRoutes);
+    apiRouter.use('/billing', billingRoutes);
     apiRouter.use('/products', productRoutes);
     apiRouter.use('/inventory', inventoryRoutes);
+    apiRouter.use('/transfers', transferRoutes);
+    apiRouter.use('/analytics', analyticsRoutes);
     apiRouter.use('/orders', orderRoutes);
     apiRouter.use('/shipping', shippingRoutes);
 
@@ -159,6 +170,8 @@ class Application {
   }
 
   private initializeErrorHandling(): void {
+    // Add correlation ID to error responses
+    this.app.use(correlationErrorMiddleware() as any);
     this.app.use(errorHandler);
   }
 

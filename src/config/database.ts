@@ -1,10 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 
 // Simple console logger for database.ts to avoid circular imports
+import { logger } from './logger';
+
 const dbLogger = {
-  debug: (message: string, data?: any) => console.log(`[DEBUG] ${message}`, data || ''),
-  info: (message: string, data?: any) => console.log(`[INFO] ${message}`, data || ''),
-  warn: (message: string, data?: any) => console.warn(`[WARN] ${message}`, data || ''),
+  debug: (message: string, data?: any) => logger.debug(message, data),
+  info: (message: string, data?: any) => logger.info(message, data),
+  warn: (message: string, data?: any) => logger.warn(message, data),
   error: (message: string, data?: any) => console.error(`[ERROR] ${message}`, data || ''),
 };
 

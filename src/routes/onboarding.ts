@@ -163,8 +163,8 @@ router.post('/invite-user', [
 
   const { email, role, tenantId } = req.body;
   
-  // TODO: Get current user from auth middleware
-  const invitedBy = 'current-user-id'; // This should come from authenticated user
+  // Get current user from auth middleware
+  const invitedBy = (req as any).user?.id || 'system';
 
   const result = await authService.createTenantInvitation(tenantId, email, role, invitedBy);
 
@@ -242,7 +242,9 @@ router.post('/accept-invitation', [
 
 // Get onboarding status
 router.get('/status', asyncHandler(async (req: Request, res: Response) => {
-  // TODO: Get current user from auth middleware and check onboarding status
+  // Get current user from auth middleware and check onboarding status
+  const userId = (req as any).user?.id;
+  const tenantId = (req as any).tenantId;
   
   res.json({
     data: {

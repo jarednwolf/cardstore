@@ -1,11 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../config/logger';
-import { 
-  InventoryItem, 
-  InventoryLocation, 
+import {
+  InventoryItem,
+  InventoryLocation,
   StockMovement,
   InventoryUpdate,
-  BulkUpdateResult
+  BulkUpdateResult,
+  RequestContext,
+  InventoryReservation,
+  ReservationResult
 } from '../types';
 
 export class InventoryService {
@@ -29,7 +32,7 @@ export class InventoryService {
       const location = await this.prisma.inventoryLocation.create({
         data: {
           tenantId,
-          shopifyLocationId: data.shopifyLocationId,
+          shopifyLocationId: data.shopifyLocationId || null,
           name: data.name,
           type: data.type,
           address: JSON.stringify(data.address || {}),
@@ -133,14 +136,14 @@ export class InventoryService {
     }
   }
 
-  async updateInventory(tenantId: string, updates: InventoryUpdate[]): Promise<void> {
+  async updateInventory(updates: InventoryUpdate[], context: RequestContext): Promise<void> {
     try {
       await this.prisma.$transaction(async (tx: any) => {
         for (const update of updates) {
           // Get or create inventory item
           let inventoryItem = await tx.inventoryItem.findFirst({
             where: {
-              tenantId,
+              tenantId: context.tenantId,
               variantId: update.variantId,
               locationId: update.locationId,
             },
@@ -150,7 +153,7 @@ export class InventoryService {
             // Create new inventory item
             inventoryItem = await tx.inventoryItem.create({
               data: {
-                tenantId,
+                tenantId: context.tenantId,
                 variantId: update.variantId,
                 locationId: update.locationId,
                 onHand: Math.max(0, update.quantityChange),
@@ -174,38 +177,49 @@ export class InventoryService {
           // Record stock movement
           await tx.stockMovement.create({
             data: {
-              tenantId,
+              tenantId: context.tenantId,
               variantId: update.variantId,
               locationId: update.locationId,
               type: update.quantityChange > 0 ? 'in' : 'out',
               quantity: Math.abs(update.quantityChange),
               reason: update.reason,
               reference: update.reference,
-              createdBy: 'dev-user', // TODO: Get from request context
+              createdBy: context.userId,
             },
           });
         }
       });
 
-      logger.info('Inventory updated successfully', { tenantId, updateCount: updates.length });
+      logger.info('Inventory updated successfully', {
+        tenantId: context.tenantId,
+        updateCount: updates.length,
+        userId: context.userId,
+        correlationId: context.correlationId
+      });
     } catch (error) {
-      logger.error('Failed to update inventory', { error, tenantId, updates });
+      logger.error('Failed to update inventory', {
+        error,
+        tenantId: context.tenantId,
+        updates,
+        userId: context.userId,
+        correlationId: context.correlationId
+      });
       throw error;
     }
   }
 
   async setInventoryLevel(
-    tenantId: string, 
-    variantId: string, 
-    locationId: string, 
+    variantId: string,
+    locationId: string,
     quantity: number,
+    context: RequestContext,
     reason: string = 'adjustment'
   ): Promise<InventoryItem> {
     try {
       const result = await this.prisma.$transaction(async (tx: any) => {
         // Get or create inventory item
         let inventoryItem = await tx.inventoryItem.findFirst({
-          where: { tenantId, variantId, locationId },
+          where: { tenantId: context.tenantId, variantId, locationId },
         });
 
         const previousQuantity = inventoryItem?.onHand || 0;
@@ -214,7 +228,7 @@ export class InventoryService {
         if (!inventoryItem) {
           inventoryItem = await tx.inventoryItem.create({
             data: {
-              tenantId,
+              tenantId: context.tenantId,
               variantId,
               locationId,
               onHand: Math.max(0, quantity),
@@ -245,14 +259,14 @@ export class InventoryService {
         if (quantityChange !== 0) {
           await tx.stockMovement.create({
             data: {
-              tenantId,
+              tenantId: context.tenantId,
               variantId,
               locationId,
               type: quantityChange > 0 ? 'in' : 'out',
               quantity: Math.abs(quantityChange),
               reason,
               reference: `Set to ${quantity}`,
-              createdBy: 'dev-user', // TODO: Get from request context
+              createdBy: context.userId,
             },
           });
         }
@@ -261,19 +275,253 @@ export class InventoryService {
       });
 
       const transformedItem = this.transformInventoryItem(result);
-      logger.info('Inventory level set', { 
-        tenantId, 
-        variantId, 
-        locationId, 
+      logger.info('Inventory level set', {
+        tenantId: context.tenantId,
+        variantId,
+        locationId,
         quantity,
-        previousQuantity: result.onHand - (quantity - (result.onHand || 0))
+        previousQuantity: result.onHand - (quantity - (result.onHand || 0)),
+        userId: context.userId,
+        correlationId: context.correlationId
       });
       
       return transformedItem;
     } catch (error) {
-      logger.error('Failed to set inventory level', { error, tenantId, variantId, locationId, quantity });
+      logger.error('Failed to set inventory level', {
+        error,
+        tenantId: context.tenantId,
+        variantId,
+        locationId,
+        quantity,
+        userId: context.userId,
+        correlationId: context.correlationId
+      });
       throw error;
     }
+  }
+
+  // =============================================================================
+  // INVENTORY RESERVATION SYSTEM
+  // =============================================================================
+
+  /**
+   * Reserve inventory for an order
+   */
+  async reserveInventory(
+    reservations: InventoryReservation[],
+    context: RequestContext
+  ): Promise<ReservationResult[]> {
+    logger.info('Reserving inventory', {
+      reservationCount: reservations.length,
+      tenantId: context.tenantId,
+      userId: context.userId,
+      correlationId: context.correlationId
+    });
+
+    return await this.prisma.$transaction(async (tx: any) => {
+      const results: ReservationResult[] = [];
+      
+      for (const reservation of reservations) {
+        try {
+          // Check available quantity
+          const inventory = await tx.inventoryItem.findFirst({
+            where: {
+              tenantId: context.tenantId,
+              variantId: reservation.variantId,
+              locationId: reservation.locationId
+            }
+          });
+          
+          if (!inventory) {
+            results.push({
+              success: false,
+              error: 'Inventory item not found',
+              availableQuantity: 0
+            });
+            continue;
+          }
+
+          const availableQuantity = inventory.onHand - inventory.reserved;
+          
+          if (availableQuantity < reservation.quantity) {
+            results.push({
+              success: false,
+              error: `Insufficient inventory: ${availableQuantity} available, ${reservation.quantity} requested`,
+              availableQuantity
+            });
+            continue;
+          }
+          
+          // Update reserved quantity
+          await tx.inventoryItem.update({
+            where: { id: inventory.id },
+            data: {
+              reserved: { increment: reservation.quantity }
+            }
+          });
+          
+          // Create reservation record
+          const reservationRecord = await tx.inventoryReservation.create({
+            data: {
+              tenantId: context.tenantId,
+              variantId: reservation.variantId,
+              locationId: reservation.locationId,
+              quantity: reservation.quantity,
+              orderId: reservation.orderId,
+              expiresAt: reservation.expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours default
+              createdBy: context.userId,
+              status: 'active'
+            }
+          });
+          
+          // Record stock movement
+          await tx.stockMovement.create({
+            data: {
+              tenantId: context.tenantId,
+              variantId: reservation.variantId,
+              locationId: reservation.locationId,
+              type: 'out',
+              quantity: reservation.quantity,
+              reason: 'reservation',
+              reference: `Reserved for order ${reservation.orderId}`,
+              createdBy: context.userId
+            }
+          });
+          
+          results.push({
+            success: true,
+            reservationId: reservationRecord.id,
+            availableQuantity: availableQuantity - reservation.quantity
+          });
+
+          logger.debug('Inventory reserved', {
+            variantId: reservation.variantId,
+            locationId: reservation.locationId,
+            quantity: reservation.quantity,
+            reservationId: reservationRecord.id,
+            orderId: reservation.orderId
+          });
+          
+        } catch (error) {
+          logger.error('Failed to reserve inventory item', {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            reservation,
+            correlationId: context.correlationId
+          });
+          
+          results.push({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            availableQuantity: 0
+          });
+        }
+      }
+      
+      return results;
+    });
+  }
+
+  /**
+   * Release inventory reservations
+   */
+  async releaseReservations(
+    reservationIds: string[],
+    context: RequestContext
+  ): Promise<void> {
+    logger.info('Releasing inventory reservations', {
+      reservationCount: reservationIds.length,
+      tenantId: context.tenantId,
+      userId: context.userId,
+      correlationId: context.correlationId
+    });
+
+    await this.prisma.$transaction(async (tx) => {
+      // Get all reservations to release
+      const reservations = await tx.inventoryReservation.findMany({
+        where: {
+          id: { in: reservationIds },
+          tenantId: context.tenantId,
+          status: 'active'
+        }
+      });
+
+      for (const reservation of reservations) {
+        // Release the reserved inventory
+        await tx.inventoryItem.updateMany({
+          where: {
+            tenantId: context.tenantId,
+            variantId: reservation.variantId,
+            locationId: reservation.locationId
+          },
+          data: {
+            reserved: { decrement: reservation.quantity }
+          }
+        });
+
+        // Mark reservation as cancelled
+        await tx.inventoryReservation.update({
+          where: { id: reservation.id },
+          data: {
+            status: 'cancelled',
+            updatedAt: new Date()
+          }
+        });
+
+        // Record stock movement
+        await tx.stockMovement.create({
+          data: {
+            tenantId: context.tenantId,
+            variantId: reservation.variantId,
+            locationId: reservation.locationId,
+            type: 'in',
+            quantity: reservation.quantity,
+            reason: 'reservation_released',
+            reference: `Released reservation ${reservation.id}`,
+            createdBy: context.userId
+          }
+        });
+      }
+    });
+
+    logger.info('Reservation release completed', {
+      reservationIds,
+      tenantId: context.tenantId
+    });
+  }
+
+  /**
+   * Release reservations by order ID
+   */
+  async releaseReservationsByOrder(
+    orderId: string,
+    context: RequestContext
+  ): Promise<void> {
+    logger.info('Releasing reservations for order', {
+      orderId,
+      tenantId: context.tenantId,
+      userId: context.userId,
+      correlationId: context.correlationId
+    });
+
+    // Find all active reservations for this order
+    const reservations = await this.prisma.inventoryReservation.findMany({
+      where: {
+        orderId,
+        tenantId: context.tenantId,
+        status: 'active'
+      }
+    });
+
+    if (reservations.length > 0) {
+      const reservationIds = reservations.map(r => r.id);
+      await this.releaseReservations(reservationIds, context);
+    }
+
+    logger.info('Order reservation release completed', {
+      orderId,
+      reservationCount: reservations.length,
+      tenantId: context.tenantId
+    });
   }
 
   // =============================================================================
@@ -407,7 +655,7 @@ export class InventoryService {
   // BULK OPERATIONS
   // =============================================================================
 
-  async bulkUpdateInventory(tenantId: string, updates: InventoryUpdate[]): Promise<BulkUpdateResult> {
+  async bulkUpdateInventory(updates: InventoryUpdate[], context: RequestContext): Promise<BulkUpdateResult> {
     const results: BulkUpdateResult = {
       success: 0,
       failed: 0,
@@ -420,7 +668,7 @@ export class InventoryService {
       const batch = updates.slice(i, i + batchSize);
       
       try {
-        await this.updateInventory(tenantId, batch);
+        await this.updateInventory(batch, context);
         results.success += batch.length;
       } catch (error) {
         results.failed += batch.length;
@@ -432,7 +680,12 @@ export class InventoryService {
       }
     }
 
-    logger.info('Bulk inventory update completed', { tenantId, results });
+    logger.info('Bulk inventory update completed', {
+      tenantId: context.tenantId,
+      results,
+      userId: context.userId,
+      correlationId: context.correlationId
+    });
     return results;
   }
 

@@ -62,7 +62,12 @@ class Application {
     // CORS configuration
     this.app.use(cors({
       origin: process.env['NODE_ENV'] === 'production'
-        ? ['https://yourdomain.com']
+        ? [
+            'https://cardstore-woad.vercel.app',
+            'https://deckstack.com',
+            'https://www.deckstack.com',
+            ...(process.env['CORS_ORIGIN'] ? process.env['CORS_ORIGIN'].split(',') : [])
+          ]
         : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3005'],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -94,7 +99,7 @@ class Application {
     this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
     // Request logging
-    this.app.use(requestLogger);
+    this.app.use(requestLogger as any);
 
     // Trust proxy for accurate IP addresses
     this.app.set('trust proxy', 1);
@@ -126,8 +131,8 @@ class Application {
     const apiRouter = express.Router();
     
     // Apply authentication and tenant middleware to all API routes
-    apiRouter.use(authMiddleware);
-    apiRouter.use(tenantMiddleware);
+    apiRouter.use(authMiddleware as any);
+    apiRouter.use(tenantMiddleware as any);
 
     // API routes
     apiRouter.use('/tenants', tenantRoutes);

@@ -1,14 +1,36 @@
-# DeckStack - Enterprise Shipping Automation Platform
+# DeckStack - Production-Ready Enterprise Shipping Automation Platform
+
+**🎉 Now with Real Authentication & Database Storage!**
 
 **Stack the deck in your favor** with DeckStack's comprehensive shipping automation and multi-tenant user management system.
 
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green.svg)](https://cardstore-woad.vercel.app)
+[![Real Auth](https://img.shields.io/badge/Authentication-Supabase-green.svg)](#)
 [![Multi-Tenant](https://img.shields.io/badge/Architecture-Multi--Tenant-blue.svg)](#)
 [![Enterprise Grade](https://img.shields.io/badge/Grade-Enterprise-purple.svg)](#)
 
 ## 🚀 Live Demo
 
 **Production Deployment**: [https://cardstore-woad.vercel.app](https://cardstore-woad.vercel.app)
+
+> **✨ Latest Update**: DeckStack is now fully productionalized with real user authentication, Supabase database integration, and multi-tenant architecture. No more demo mode - create real accounts and stores!
+
+## 🎯 **What's New - Production Features**
+
+### **🔐 Real Authentication System**
+- ✅ **Supabase Authentication** - Real user registration and login
+- ✅ **JWT Session Management** - Secure token-based authentication
+- ✅ **Multi-Tenant Store Creation** - Real tenant creation with subdomains
+- ✅ **Production Database** - PostgreSQL with Row Level Security
+
+### **🏗️ Production Architecture**
+```
+Frontend (Vercel Static) → Backend API (Vercel Serverless) → Supabase PostgreSQL + Auth
+```
+
+### **🔄 Migration from Demo to Production**
+- **Before**: Mock authentication responses and fake success messages
+- **After**: Real user accounts stored in Supabase with actual tenant creation
 
 ## ✨ What is DeckStack?
 
@@ -48,13 +70,42 @@ DeckStack is a professional SaaS shipping automation platform designed for e-com
 
 ## 🚀 Quick Start
 
-### 🔧 Prerequisites
+### **Option 1: Production Deployment (Recommended)**
+
+#### 🔧 Prerequisites
+- Supabase account (for database and authentication)
+- Vercel account (for deployment)
+
+#### ⚡ Deploy to Production
+```bash
+# 1. Configure Supabase Database
+# Go to: https://supabase.com/dashboard/project/iqkwlsrjgwvcbemvdqak
+# Run the SQL schema from PRODUCTION_DEPLOYMENT_GUIDE.md
+# Get your API keys from Settings → API
+
+# 2. Set Vercel Environment Variables
+SUPABASE_URL=https://iqkwlsrjgwvcbemvdqak.supabase.co
+SUPABASE_ANON_KEY=[your-anon-key]
+SUPABASE_SERVICE_ROLE_KEY=[your-service-role-key]
+DATABASE_URL=[your-database-url]
+JWT_SECRET=[generate-secure-32-char-string]
+NODE_ENV=production
+
+# 3. Deploy
+npm run build
+vercel --prod
+
+# 4. Test your deployment
+# Visit your Vercel URL and create a real account!
+```
+
+### **Option 2: Local Development**
+
+#### 🔧 Prerequisites
 - Node.js 18+ and npm
-- PostgreSQL database
-- Supabase account (optional, for enhanced auth)
+- Supabase account (required for authentication)
 
-### ⚡ Installation
-
+#### ⚡ Local Setup
 ```bash
 # 1. Clone the repository
 git clone https://github.com/your-org/deckstack.git
@@ -65,20 +116,18 @@ npm install
 
 # 3. Set up environment variables
 cp .env.example .env
-# Edit .env with your configuration
+# Configure with your Supabase credentials
 
-# 4. Initialize database
-npx prisma migrate deploy
-npm run seed
-
-# 5. Start development server
+# 4. Start development server
 npm run dev
 
-# 6. Access the application
+# 5. Access the application
 # Frontend: http://localhost:3005
 # API: http://localhost:3005/api/v1
 # Health: http://localhost:3005/health
 ```
+
+> **📖 Complete Setup Guide**: See [`PRODUCTION_DEPLOYMENT_GUIDE.md`](PRODUCTION_DEPLOYMENT_GUIDE.md) for detailed step-by-step instructions.
 
 ## 👥 User Roles & Permissions
 
@@ -99,6 +148,10 @@ npm run dev
 - **Testing**: Jest with comprehensive test suites
 
 ## 📚 Documentation
+
+### 🚀 **Production Deployment**
+- **[Production Deployment Guide](./PRODUCTION_DEPLOYMENT_GUIDE.md)** - Complete step-by-step deployment instructions
+- **[Productionalization Summary](./PRODUCTIONALIZATION_SUMMARY.md)** - Summary of production changes and features
 
 ### 📖 **Core Documentation**
 - **[Getting Started](./docs/GETTING_STARTED.md)** - Quick setup and installation guide
@@ -172,20 +225,30 @@ vercel --prod
 
 ## 📊 API Overview
 
-### Core Endpoints
+### **Production Authentication Endpoints**
 ```http
-# Authentication
-POST /api/v1/auth/login
-POST /api/v1/auth/signup
+# Real Authentication (Production Ready)
+POST /api/auth/signup          # Create account with tenant
+POST /api/auth/login           # User login
+POST /api/auth/logout          # User logout
+GET  /api/auth/me              # Current user info
 
+# Onboarding & Tenant Management
+POST /api/v1/onboarding/create-tenant        # Create new tenant
+GET  /api/v1/onboarding/check-subdomain/:id  # Check subdomain availability
+GET  /api/v1/onboarding/status               # Onboarding progress
+
+# System Health
+GET  /health                   # Basic health check
+GET  /api/v1/health/detailed   # Comprehensive health check
+GET  /api/v1/system/status     # Service status
+```
+
+### **Coming Soon - Business Operations**
+```http
 # User Management
 GET  /api/v1/users
-POST /api/v1/users
 POST /api/v1/users/invite
-
-# Tenant Management
-GET  /api/v1/tenants/current
-PUT  /api/v1/tenants/{id}/settings
 
 # Shipping Operations
 GET  /api/v1/orders
@@ -205,21 +268,31 @@ GET  /api/v1/shipping/rates
 
 ## 📈 System Status
 
-### Current Version: v1.0 - Production Ready ✅
+### Current Version: v1.0 - Production Ready with Real Authentication ✅
 
-**✅ Completed Features:**
-- Multi-tenant architecture with complete data isolation
-- Enterprise user management with RBAC
-- Shipping automation with multi-carrier support
-- TCG-specific features and optimizations
-- Comprehensive audit logging and security
-- Beautiful, responsive user interface
-- Production deployment and monitoring
+**✅ Production Features (Live Now):**
+- ✅ **Real User Authentication** - Supabase Auth with JWT tokens
+- ✅ **Multi-Tenant Architecture** - Complete data isolation with Row Level Security
+- ✅ **Production Database** - PostgreSQL with automated user/tenant creation
+- ✅ **Secure Session Management** - Token-based authentication with refresh
+- ✅ **Enterprise User Management** - Role-based access control (Owner, Manager, Staff, Viewer)
+- ✅ **Production Deployment** - Vercel serverless with Supabase backend
+- ✅ **Comprehensive Security** - CORS, rate limiting, input validation, audit logging
+- ✅ **Onboarding Flow** - Real tenant creation with subdomain validation
 
-**🔄 In Development:**
+**🔄 Coming Soon:**
+- Email verification for new accounts
+- Inventory management system
+- Order processing and shipping automation
+- Multi-carrier shipping integration
 - Advanced analytics dashboard
 - Real-time notifications system
-- Mobile application support
+
+**🎯 Recent Productionalization (Latest Update):**
+- Migrated from demo/mock authentication to real Supabase integration
+- Implemented actual database storage for users and tenants
+- Added production-grade security and error handling
+- Created comprehensive deployment guides and documentation
 
 ## 🤝 Contributing
 
@@ -235,12 +308,20 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ## 🆘 Support
 
+### **Production Support**
+- **Production Deployment Guide**: [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRODUCTION_DEPLOYMENT_GUIDE.md)
+- **Productionalization Summary**: [PRODUCTIONALIZATION_SUMMARY.md](./PRODUCTIONALIZATION_SUMMARY.md)
+- **Live Demo**: [https://cardstore-woad.vercel.app](https://cardstore-woad.vercel.app) *(Try creating a real account!)*
+
+### **Development Support**
 - **Documentation**: [docs/](./docs/)
+- **Troubleshooting**: [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
 - **Issues**: [GitHub Issues](https://github.com/your-org/deckstack/issues)
-- **Live Demo**: [https://cardstore-woad.vercel.app](https://cardstore-woad.vercel.app)
 
 ---
 
-**DeckStack** - Professional shipping automation for the modern e-commerce business.
+**DeckStack** - Production-ready shipping automation with real authentication and multi-tenant architecture.
 
 *Stack the deck in your favor.* 🃏
+
+**🎉 Latest Achievement**: Fully productionalized with Supabase authentication, PostgreSQL database, and enterprise-grade security!

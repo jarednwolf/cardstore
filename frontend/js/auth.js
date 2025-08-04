@@ -147,10 +147,10 @@ class AuthSystem {
                 })
             });
 
-            if (response.success) {
-                this.handleAuthSuccess(response.user, response.token);
+            if (response.data && response.data.user) {
+                this.handleAuthSuccess(response.data.user, response.data.session);
             } else {
-                this.showError('Invalid email or password. Please try again.');
+                this.showError(response.error?.message || 'Invalid email or password. Please try again.');
             }
 
         } catch (error) {
@@ -199,10 +199,10 @@ class AuthSystem {
                 })
             });
 
-            if (response.success) {
-                this.handleAuthSuccess(response.user, response.token);
+            if (response.data && response.data.user) {
+                this.handleAuthSuccess(response.data.user, response.data.session);
             } else {
-                this.showError(response.error || 'Unable to create account. Please try again.');
+                this.showError(response.error?.message || 'Unable to create account. Please try again.');
             }
 
         } catch (error) {
@@ -340,27 +340,45 @@ class AuthSystem {
         };
 
         const response = await fetch(url, config);
+        const data = await response.json();
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // Handle API error responses
+            throw new Error(data.error?.message || `HTTP ${response.status}: ${response.statusText}`);
         }
 
-        return await response.json();
+        return data;
     }
 
     // Success Handler
-    handleAuthSuccess(user, token) {
+    handleAuthSuccess(user, session) {
         // Store authentication data
-        localStorage.setItem('deckstack_token', token);
+        if (session && session.access_token) {
+            localStorage.setItem('deckstack_token', session.access_token);
+            localStorage.setItem('deckstack_refresh_token', session.refresh_token);
+        }
         localStorage.setItem('deckstack_user', JSON.stringify(user));
 
-        // Show success message
-        this.showSuccess('Welcome to DeckStack! Redirecting to your dashboard...');
-
-        // Redirect to main application
-        setTimeout(() => {
-            window.location.href = '/dashboard.html';
-        }, 2000);
+        // Determine redirect based on context
+        const isSignup = this.currentSection === 'signup';
+        
+        if (isSignup) {
+            // Show success message for new accounts
+            this.showSuccess('Account created successfully! Setting up your store...');
+            
+            // Redirect to onboarding flow for new users
+            setTimeout(() => {
+                window.location.href = '/dashboard.html?view=onboarding&step=welcome';
+            }, 2000);
+        } else {
+            // Show success message for login
+            this.showSuccess('Welcome back! Redirecting to your dashboard...');
+            
+            // Redirect to main dashboard for existing users
+            setTimeout(() => {
+                window.location.href = '/dashboard.html';
+            }, 2000);
+        }
     }
 
     // UI Helper Methods

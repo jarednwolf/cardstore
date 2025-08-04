@@ -33,6 +33,10 @@
     },
     {
       "src": "/",
+      "dest": "/frontend/index.html"
+    },
+    {
+      "src": "/auth",
       "dest": "/frontend/auth.html"
     },
     {

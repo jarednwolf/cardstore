@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import { createServer } from 'http';
 import { env } from './config/env';
 import { logger } from './config/logger';
 import { prisma } from './config/database';
@@ -12,6 +13,8 @@ import { correlationIdMiddleware, correlationErrorMiddleware } from './middlewar
 import { apiTrackingMiddleware } from './middleware/apiTracking';
 import { authMiddleware } from './middleware/auth';
 import { tenantMiddleware } from './middleware/tenant';
+import { websocketService } from './services/websocketService';
+import { automationService } from './services/automationService';
 
 // Import route handlers
 import { healthRoutes } from './routes/health';
@@ -30,16 +33,20 @@ import { transferRoutes } from './routes/transfers';
 import { analyticsRoutes } from './routes/analytics';
 import pricingRoutes from './routes/pricing';
 import marketplaceRoutes from './routes/marketplace';
+import automationRoutes from './routes/automation';
 
 class Application {
   public app: express.Application;
   private server: any;
+  private httpServer: any;
 
   constructor() {
     this.app = express();
+    this.httpServer = createServer(this.app);
     this.initializeMiddleware();
     this.initializeRoutes();
     this.initializeErrorHandling();
+    this.initializeWebSocket();
   }
 
   private initializeMiddleware(): void {
@@ -57,7 +64,7 @@ class Application {
         directives: {
           defaultSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
-          scriptSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.socket.io"],
           scriptSrcAttr: ["'unsafe-inline'"],
           connectSrc: ["'self'", "ws://localhost:3005", "http://localhost:3005"],
           imgSrc: ["'self'", "data:", "https:"],
@@ -66,19 +73,31 @@ class Application {
       },
     }));
 
-    // CORS configuration
+    // CORS configuration - more restrictive and secure
     this.app.use(cors({
-      origin: process.env['NODE_ENV'] === 'production'
-        ? [
-            'https://cardstore-woad.vercel.app',
-            'https://deckstack.com',
-            'https://www.deckstack.com',
-            ...(process.env['CORS_ORIGIN'] ? process.env['CORS_ORIGIN'].split(',') : [])
-          ]
-        : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3005'],
+      origin: (origin, callback) => {
+        const allowedOrigins = process.env['NODE_ENV'] === 'production'
+          ? [
+              'https://cardstore-woad.vercel.app',
+              'https://deckstack.com',
+              'https://www.deckstack.com',
+              ...(process.env['CORS_ORIGIN'] ? process.env['CORS_ORIGIN'].split(',') : [])
+            ]
+          : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3005'];
+        
+        // Allow requests with no origin (mobile apps, etc.)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID', 'X-Correlation-ID'],
+      maxAge: 86400, // 24 hours
     }));
 
     // Compression
@@ -154,15 +173,17 @@ class Application {
     apiRouter.use('/analytics', analyticsRoutes);
     apiRouter.use('/pricing', pricingRoutes);
     apiRouter.use('/marketplace', marketplaceRoutes);
+    apiRouter.use('/automation', automationRoutes);
     apiRouter.use('/orders', orderRoutes);
     apiRouter.use('/shipping', shippingRoutes);
 
     this.app.use(`/api/${env.API_VERSION}`, apiRouter);
 
-    // Simple WebSocket endpoint (returns 200 for now)
+    // WebSocket status endpoint
     this.app.get('/ws', (_req, res) => {
       res.status(200).json({
-        message: 'WebSocket endpoint - upgrade to WebSocket not implemented yet',
+        message: 'WebSocket server is running',
+        connectedClients: websocketService.getConnectedClientCount(),
         timestamp: new Date().toISOString()
       });
     });
@@ -177,6 +198,105 @@ class Application {
     // Add correlation ID to error responses
     this.app.use(correlationErrorMiddleware() as any);
     this.app.use(errorHandler);
+  }
+
+  private initializeWebSocket(): void {
+    try {
+      // Initialize WebSocket service
+      websocketService.initialize(this.httpServer);
+      
+      // Connect automation service events to WebSocket
+      this.setupAutomationWebSocketIntegration();
+      
+      logger.info('WebSocket service initialized successfully');
+    } catch (error: any) {
+      logger.error('Failed to initialize WebSocket service', { error: error.message });
+    }
+  }
+
+  private setupAutomationWebSocketIntegration(): void {
+    // Listen for automation events and broadcast via WebSocket
+    automationService.on('automation.started', (data) => {
+      websocketService.broadcastAutomationStatus(true, data);
+    });
+
+    automationService.on('automation.stopped', (data) => {
+      websocketService.broadcastAutomationStatus(false, data);
+    });
+
+    automationService.on('order.stage.updated', (data) => {
+      websocketService.broadcastAutomationEvent({
+        type: this.mapStageToEventType(data.stage),
+        orderId: data.orderId,
+        timestamp: data.timestamp,
+        data: data.data
+      });
+    });
+
+    // Listen for WebSocket automation control events
+    websocketService.on('automation:start', () => {
+      automationService.startAutomation().catch(error => {
+        logger.error('Failed to start automation from WebSocket', { error: error.message });
+      });
+    });
+
+    websocketService.on('automation:stop', () => {
+      automationService.stopAutomation().catch(error => {
+        logger.error('Failed to stop automation from WebSocket', { error: error.message });
+      });
+    });
+
+    websocketService.on('automation:test', () => {
+      // Simulate a test order for demonstration
+      const testOrder = {
+        id: `test_${Date.now()}`,
+        order_number: `TEST-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+        line_items: [
+          {
+            variant_id: 'test_variant_1',
+            sku: 'TEST-SKU-001',
+            title: 'Test Product',
+            quantity: 1,
+            properties: [{ name: 'location', value: 'A1-B2' }]
+          }
+        ],
+        customer: {
+          first_name: 'Test',
+          last_name: 'Customer',
+          email: 'test@example.com'
+        },
+        shipping_address: {
+          company: 'Test Company'
+        },
+        note: 'This is a test order for automation testing',
+        tags: ['test', 'automation']
+      };
+
+      automationService.processShopifyOrder(testOrder, 'default').catch(error => {
+        logger.error('Failed to process test order', { error: error.message });
+      });
+    });
+
+    logger.info('Automation WebSocket integration setup complete');
+  }
+
+  private mapStageToEventType(stage: string): any {
+    switch (stage) {
+      case 'received':
+        return 'order_received';
+      case 'validated':
+        return 'order_validated';
+      case 'synced':
+        return 'inventory_synced';
+      case 'printed':
+        return 'receipt_printed';
+      case 'complete':
+        return 'order_complete';
+      case 'failed':
+        return 'error';
+      default:
+        return 'order_received';
+    }
   }
 
   public async start(): Promise<void> {
@@ -195,11 +315,12 @@ class Application {
       }
 
       // Start server
-      this.server = this.app.listen(env.PORT, () => {
+      this.server = this.httpServer.listen(env.PORT, () => {
         logger.info(`DeckStack started`, {
           port: env.PORT,
           environment: env.NODE_ENV,
           version: env.API_VERSION,
+          websocket: 'enabled'
         });
       });
 
@@ -222,6 +343,10 @@ class Application {
           logger.info('HTTP server closed');
 
           try {
+            // Shutdown WebSocket service
+            websocketService.shutdown();
+            logger.info('WebSocket service shut down');
+
             // Close database connections
             await prisma.$disconnect();
             logger.info('Database connections closed');

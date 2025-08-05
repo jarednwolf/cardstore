@@ -8,7 +8,7 @@ import {
   OrderSearchQuery,
   APIResponse,
   RequestContext
-} from '../types';
+} from '../types/index';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -23,7 +23,8 @@ function getRequestContext(req: Request): RequestContext {
     userRole: (req as any).user?.role || 'manager',
     correlationId: req.headers['x-correlation-id'] as string || `req-${Date.now()}`,
     userAgent: req.headers['user-agent'] || 'unknown',
-    ipAddress: req.ip || 'unknown'
+    ipAddress: req.ip || 'unknown',
+    timestamp: new Date()
   };
 }
 
@@ -36,7 +37,6 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
     source: req.query['source'] as any,
     customerId: req.query['customerId'] as string,
     limit: req.query['limit'] ? parseInt(req.query['limit'] as string) : 20,
-    cursor: req.query['cursor'] as string,
     sortBy: req.query['sortBy'] as string || 'createdAt',
     sortOrder: req.query['sortOrder'] as 'asc' | 'desc' || 'desc'
   };

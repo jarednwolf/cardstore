@@ -289,10 +289,9 @@ export interface Address {
 export interface Tenant {
   id: string;
   name: string;
-  domain: string;
-  plan: string;
-  status: string;
+  subdomain: string;
   settings: any;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

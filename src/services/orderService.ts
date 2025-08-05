@@ -16,7 +16,7 @@ import {
   ReservationResult,
   RequestContext,
   InventoryUpdate
-} from '../types';
+} from '../types/index';
 import { InventoryService } from './inventoryService';
 
 export interface OrderProcessingResult {

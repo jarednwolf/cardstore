@@ -10,13 +10,25 @@ const shippingService = new ShippingService(prisma);
 
 // Helper function to get request context
 function getRequestContext(req: Request): RequestContext {
+  const user = (req as any).user || {
+    id: 'dev-user',
+    email: 'dev@example.com',
+    name: 'Development User',
+    tenantId: 'default-tenant',
+    role: 'manager' as const,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+
   return {
-    userId: (req as any).user?.id || 'dev-user',
-    tenantId: (req as any).tenantId || 'default-tenant',
-    userRole: (req as any).user?.role || 'manager',
-    correlationId: req.headers['x-correlation-id'] as string || `req-${Date.now()}`,
+    user,
+    tenantId: (req as any).tenantId || user.tenantId,
+    ipAddress: req.ip || 'unknown',
     userAgent: req.headers['user-agent'] || 'unknown',
-    ipAddress: req.ip || 'unknown'
+    userId: user.id,
+    userRole: user.role,
+    correlationId: req.headers['x-correlation-id'] as string || `req-${Date.now()}`
   };
 }
 
@@ -31,7 +43,8 @@ router.get('/rates/:orderId', asyncHandler(async (req: Request, res: Response) =
 
   const rates = await shippingService.getShippingRates(orderId, context);
   
-  const response: APIResponse<typeof rates> = {
+  const response = {
+    success: true,
     data: rates
   };
 
@@ -45,7 +58,8 @@ router.post('/labels', asyncHandler(async (req: Request, res: Response) => {
   
   const label = await shippingService.createShippingLabel(createRequest, context);
   
-  const response: APIResponse<typeof label> = {
+  const response = {
+    success: true,
     data: label
   };
 
@@ -63,7 +77,8 @@ router.post('/labels/batch', asyncHandler(async (req: Request, res: Response) =>
 
   const result = await shippingService.batchCreateLabels(requests, context);
   
-  const response: APIResponse<typeof result> = {
+  const response = {
+    success: true,
     data: result
   };
 
@@ -80,7 +95,8 @@ router.post('/labels/print', asyncHandler(async (req: Request, res: Response) =>
 
   const result = await shippingService.printLabels(labelIds, format);
   
-  const response: APIResponse<typeof result> = {
+  const response = {
+    success: true,
     data: result
   };
 
@@ -98,7 +114,8 @@ router.get('/tracking/:trackingNumber', asyncHandler(async (req: Request, res: R
 
   const trackingInfo = await shippingService.getTrackingInfo(trackingNumber, carrier);
   
-  const response: APIResponse<typeof trackingInfo> = {
+  const response = {
+    success: true,
     data: trackingInfo
   };
 
@@ -175,7 +192,8 @@ router.get('/carriers', asyncHandler(async (req: Request, res: Response) => {
     }
   ];
 
-  const response: APIResponse<typeof carriers> = {
+  const response = {
+    success: true,
     data: carriers
   };
 

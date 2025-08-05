@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Control Center - CardStore</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/automation.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-layer-group"></i> CardStore</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html"><i class="fas fa-dashboard"></i> Dashboard</a></li>
+                <li><a href="automation.html" class="active"><i class="fas fa-robot"></i> Automation</a></li>
+                <li><a href="inventory.html"><i class="fas fa-boxes"></i> Inventory</a></li>
+                <li><a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a></li>
+                <li><a href="products.html"><i class="fas fa-tags"></i> Products</a></li>
+                <li><a href="shipping.html"><i class="fas fa-truck"></i> Shipping</a></li>
+                <li><a href="users.html"><i class="fas fa-users"></i> Users</a></li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="current-user">Loading...</span>
+                </div>
+                <button onclick="logout()" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="header-left">
+                    <h1><i class="fas fa-robot"></i> Automation Control Center</h1>
+                    <p class="page-description">Monitor and control automated order processing</p>
+                </div>
+                <div class="header-right">
+                    <button id="refresh-btn" class="btn btn-secondary" onclick="automationDashboard.refresh()">
+                        <i class="fas fa-refresh"></i> Refresh
+                    </button>
+                    <button id="settings-btn" class="btn btn-outline" onclick="automationDashboard.showSettings()">
+                        <i class="fas fa-cog"></i> Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- Automation Status Banner -->
+            <div id="automation-status-banner" class="status-banner">
+                <div class="status-content">
+                    <div class="status-indicator">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <div class="status-text">
+                        <span class="status-title">Automation Status</span>
+                        <span class="status-message">Loading...</span>
+                    </div>
+                </div>
+                <div class="status-actions">
+                    <button id="automation-toggle" class="btn btn-primary" onclick="automationDashboard.toggleAutomation()">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Container -->
+            <div id="automation-view" class="automation-container">
+                <!-- Dashboard content will be rendered here -->
+                <div class="loading-container">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <p>Loading automation dashboard...</p>
+                </div>
+            </div>
+
+            <!-- Connection Status Footer -->
+            <div class="connection-status-footer">
+                <div class="connection-item">
+                    <span class="connection-label">BinderPOS:</span>
+                    <span id="binderpos-status" class="connection-status disconnected">
+                        <i class="fas fa-circle"></i> Disconnected
+                    </span>
+                </div>
+                <div class="connection-item">
+                    <span class="connection-label">WebSocket:</span>
+                    <span id="websocket-status" class="connection-status disconnected">
+                        <i class="fas fa-circle"></i> Disconnected
+                    </span>
+                </div>
+                <div class="connection-item">
+                    <span class="connection-label">Last Update:</span>
+                    <span id="last-update">Never</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Automation Settings</h3>
+                <button class="modal-close" onclick="closeModal('settings-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>BinderPOS Configuration</h4>
+                    <div class="form-group">
+                        <label for="binderpos-url">API URL:</label>
+                        <input type="url" id="binderpos-url" placeholder="http://localhost:8080/api">
+                    </div>
+                    <div class="form-group">
+                        <label for="binderpos-store-id">Store ID:</label>
+                        <input type="text" id="binderpos-store-id" placeholder="Your store ID">
+                    </div>
+                    <button class="btn btn-secondary" onclick="automationDashboard.testBinderPOSConnection()">
+                        <i class="fas fa-plug"></i> Test Connection
+                    </button>
+                    <button class="btn btn-info" onclick="automationDashboard.testAutomation()">
+                        <i class="fas fa-flask"></i> Test Automation
+                    </button>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>Automation Rules</h4>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="auto-print-receipts" checked>
+                            Automatically print receipts
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="auto-sync-inventory" checked>
+                            Automatically sync inventory
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="retry-attempts">Max retry attempts:</label>
+                        <input type="number" id="retry-attempts" value="3" min="1" max="10">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('settings-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="automationDashboard.saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="order-details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-shopping-cart"></i> Order Details</h3>
+                <button class="modal-close" onclick="closeModal('order-details-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="order-details-content">
+                <!-- Order details will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('order-details-modal')">Close</button>
+                <button class="btn btn-warning" onclick="automationDashboard.retryOrder()">
+                    <i class="fas fa-redo"></i> Retry Order
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Global notification function for automation dashboard
+        function showNotification(message, type = 'info') {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="notification-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add to page
+            let container = document.getElementById('notification-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'notification-container';
+                container.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 10000;
+                    max-width: 400px;
+                `;
+                document.body.appendChild(container);
+            }
+            
+            container.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    </script>
+    <script src="js/automation.js"></script>
+    
+    <script>
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Initialize the main app
+                await initializeApp();
+                
+                // Initialize automation dashboard
+                window.automationDashboard = new AutomationDashboard();
+                await window.automationDashboard.initialize();
+                
+                // Set up periodic refresh
+                setInterval(() => {
+                    window.automationDashboard.refreshMetrics();
+                }, 30000); // Refresh every 30 seconds
+                
+            } catch (error) {
+                console.error('Failed to initialize automation dashboard:', error);
+                showNotification('Failed to initialize automation dashboard', 'error');
+            }
+        });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && window.automationDashboard) {
+                window.automationDashboard.refresh();
+            }
+        });
+
+        // Handle online/offline status
+        window.addEventListener('online', () => {
+            showNotification('Connection restored', 'success');
+            if (window.automationDashboard) {
+                window.automationDashboard.refresh();
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            showNotification('Connection lost - working offline', 'warning');
+        });
+
+        // Global error handler
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+            showNotification('An unexpected error occurred', 'error');
+        });
+
+        // Unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            showNotification('An unexpected error occurred', 'error');
+        });
+    </script>
+</body>
+</html>

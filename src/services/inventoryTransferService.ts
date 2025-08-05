@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../config/logger';
-import { RequestContext } from '../types';
+import { RequestContext } from '../types/index';
 
 export interface InventoryTransfer {
   id: string;
@@ -94,8 +94,8 @@ export class InventoryTransferService {
           quantity: request.quantity,
           status: 'pending',
           reason: request.reason,
-          reference: request.reference,
-          notes: request.notes,
+          reference: request.reference || null,
+          notes: request.notes || null,
           createdBy: context.userId
         }
       });

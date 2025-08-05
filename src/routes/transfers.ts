@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { asyncHandler } from '../middleware/errorHandler';
 import { InventoryTransferService, CreateTransferRequest } from '../services/inventoryTransferService';
-import { RequestContext } from '../types';
+import { RequestContext } from '../types/index';
 import { logger } from '../config/logger';
 import { createRequestContext, AuthenticatedRequest } from '../middleware/auth';
 import { TenantRequest } from '../middleware/tenant';

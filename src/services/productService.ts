@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../config/logger';
-import { 
-  Product, 
-  ProductVariant, 
-  CreateProductRequest, 
+import {
+  Product,
+  ProductVariant,
+  CreateProductRequest,
   UpdateProductRequest,
   CreateVariantRequest,
   UpdateVariantRequest,
@@ -11,7 +11,7 @@ import {
   ProductSearchResult,
   TCGAttributes,
   BulkUpdateResult
-} from '../types';
+} from '../types/index';
 
 export class ProductService {
   private prisma: PrismaClient;

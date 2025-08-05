@@ -9,7 +9,7 @@ import {
   RequestContext,
   InventoryReservation,
   ReservationResult
-} from '../types';
+} from '../types/index';
 
 export class InventoryService {
   private prisma: PrismaClient;

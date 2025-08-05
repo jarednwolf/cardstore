@@ -511,7 +511,7 @@ export interface RequestContext {
   correlationId: string;
   userAgent?: string | undefined;
   ipAddress?: string | undefined;
-  timestamp?: Date;
+  timestamp: Date;
 }
 
 // Configuration types

@@ -230,7 +230,7 @@ export class BusinessIntelligenceService {
     tenantId: string,
     timeframe: TimeFrame
   ): Promise<SalesMetrics> {
-    // Get current period orders
+    // Get current period orders with optimized includes
     const currentOrders = await this.prisma.order.findMany({
       where: {
         tenantId,
@@ -244,12 +244,26 @@ export class BusinessIntelligenceService {
         lineItems: {
           include: {
             variant: {
-              include: {
-                product: true
+              select: {
+                id: true,
+                title: true,
+                sku: true,
+                price: true,
+                product: {
+                  select: {
+                    id: true,
+                    title: true,
+                    category: true,
+                    vendor: true
+                  }
+                }
               }
             }
           }
         }
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     });
 
@@ -308,11 +322,27 @@ export class BusinessIntelligenceService {
       where: { tenantId },
       include: {
         variant: {
-          include: {
-            product: true
+          select: {
+            id: true,
+            title: true,
+            sku: true,
+            price: true,
+            product: {
+              select: {
+                id: true,
+                title: true,
+                category: true
+              }
+            }
           }
         },
-        location: true
+        location: {
+          select: {
+            id: true,
+            name: true,
+            type: true
+          }
+        }
       }
     });
 

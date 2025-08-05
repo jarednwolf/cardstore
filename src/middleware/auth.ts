@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
 import { logger } from '../config/logger';
 import { UnauthorizedError, ForbiddenError } from './errorHandler';
-import { JWTPayload, User, RequestContext } from '../types';
+import { JWTPayload, User, RequestContext } from '../types/index';
 import { authService } from '../services/authService';
 import { isSupabaseConfigured } from '../config/supabase';
 import { v4 as uuidv4 } from 'uuid';
@@ -39,29 +39,7 @@ export const authMiddleware = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Development and test bypass - allow requests with x-tenant-id header
-    if ((env.NODE_ENV === 'development' || env.NODE_ENV === 'test') && req.headers['x-tenant-id']) {
-      req.user = {
-        id: 'dev-user',
-        tenantId: req.headers['x-tenant-id'] as string,
-        email: 'dev@example.com',
-        name: 'Development User',
-        role: 'owner',
-        isActive: true,
-        lastLoginAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      req.tenantId = req.headers['x-tenant-id'] as string;
-      req.context = createRequestContext(req);
-      
-      logger.debug('Development auth bypass', {
-        tenantId: req.tenantId,
-        correlationId: req.context.correlationId
-      });
-      
-      return next();
-    }
+    // Note: Development bypasses removed for security
 
     const authHeader = req.headers.authorization;
     
@@ -71,30 +49,7 @@ export const authMiddleware = async (
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
-    // Development and test demo token bypass
-    if ((env.NODE_ENV === 'development' || env.NODE_ENV === 'test') && token === 'demo-token-for-testing') {
-      const tenantId = req.headers['x-tenant-id'] as string || 'test-tenant';
-      req.user = {
-        id: 'demo-user',
-        tenantId: tenantId,
-        email: 'demo@example.com',
-        name: 'Demo User',
-        role: 'owner',
-        isActive: true,
-        lastLoginAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      req.tenantId = tenantId;
-      req.context = createRequestContext(req);
-      
-      logger.debug('Demo token auth bypass', {
-        tenantId: req.tenantId,
-        correlationId: req.context.correlationId
-      });
-      
-      return next();
-    }
+    // Note: Demo token bypass removed for security
     
     // If Supabase is configured, use Supabase authentication
     if (isSupabaseConfigured()) {
@@ -122,38 +77,9 @@ export const authMiddleware = async (
         throw new UnauthorizedError('Invalid or expired token');
       }
     } else {
-      // Fallback to JWT verification for development
-      try {
-        const decoded = jwt.verify(token, env.JWT_SECRET) as JWTPayload;
-        
-        // Create a basic user object for development
-        req.user = {
-          id: decoded.userId,
-          email: '', // Will be populated from database
-          role: 'owner', // Default role for development
-          tenantId: decoded.tenantId,
-          name: 'Development User',
-          lastLoginAt: new Date(),
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        
-        req.tenantId = decoded.tenantId;
-        req.context = createRequestContext(req);
-        
-        logger.debug('User authenticated via JWT fallback', {
-          userId: decoded.userId,
-          tenantId: decoded.tenantId,
-          roles: decoded.roles,
-          correlationId: req.context.correlationId
-        });
-        
-        next();
-      } catch (jwtError) {
-        logger.warn('Invalid JWT token', { error: jwtError });
-        throw new UnauthorizedError('Invalid or expired token');
-      }
+      // No fallback authentication - require proper Supabase auth
+      logger.warn('Supabase not configured and no valid authentication method available');
+      throw new UnauthorizedError('Authentication service not properly configured');
     }
   } catch (error) {
     next(error);

@@ -2,6 +2,49 @@ import { PrismaClient } from '@prisma/client';
 import { logger } from '../config/logger';
 import { cacheService } from './cacheService';
 
+// Database connection helper
+class DatabaseConnection {
+  private static instance: PrismaClient | null = null;
+  private static isConnected = false;
+
+  static getInstance(): PrismaClient | null {
+    if (!this.instance) {
+      try {
+        // Only create Prisma client if DATABASE_URL is properly configured
+        if (process.env['DATABASE_URL'] && process.env['DATABASE_URL'].startsWith('postgresql://')) {
+          this.instance = new PrismaClient();
+          this.isConnected = true;
+          logger.info('Database connection established');
+        } else {
+          logger.warn('Database not configured - running in mock mode');
+          this.isConnected = false;
+        }
+      } catch (error) {
+        logger.error('Failed to initialize database connection', error);
+        this.isConnected = false;
+      }
+    }
+    return this.instance;
+  }
+
+  static isAvailable(): boolean {
+    return this.isConnected && this.instance !== null;
+  }
+
+  static async testConnection(): Promise<boolean> {
+    if (!this.isAvailable()) return false;
+    
+    try {
+      await this.instance!.$queryRaw`SELECT 1`;
+      return true;
+    } catch (error) {
+      logger.error('Database connection test failed', error);
+      this.isConnected = false;
+      return false;
+    }
+  }
+}
+
 export interface PerformanceMetrics {
   timestamp: Date;
   apiResponseTimes: {
@@ -61,8 +104,10 @@ export class PerformanceMonitoringService {
   private alerts: PerformanceAlert[] = [];
   private queryLog: QueryPerformanceData[] = [];
   private maxQueryLogSize = 1000;
+  private prisma: PrismaClient | null;
 
-  constructor(private prisma: PrismaClient) {
+  constructor() {
+    this.prisma = DatabaseConnection.getInstance();
     this.initializeMonitoring();
   }
 
@@ -389,11 +434,33 @@ export class PerformanceMonitoringService {
     ordersPerHour: number;
     inventoryUpdatesPerHour: number;
   }> {
+    // Return mock data if database is not available
+    if (!DatabaseConnection.isAvailable() || !this.prisma) {
+      return {
+        activeUsers: 0,
+        apiCallsPerMinute: 0,
+        ordersPerHour: 0,
+        inventoryUpdatesPerHour: 0
+      };
+    }
+
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 3600000);
     const oneMinuteAgo = new Date(now.getTime() - 60000);
 
     try {
+      // Test database connection before making queries
+      const isConnected = await DatabaseConnection.testConnection();
+      if (!isConnected) {
+        logger.warn('Database connection unavailable, returning mock metrics');
+        return {
+          activeUsers: 0,
+          apiCallsPerMinute: 0,
+          ordersPerHour: 0,
+          inventoryUpdatesPerHour: 0
+        };
+      }
+
       const [apiCalls, orders] = await Promise.all([
         this.prisma.apiCallLog.count({
           where: {
@@ -579,6 +646,4 @@ export class PerformanceMonitoringService {
 }
 
 // Export singleton instance
-export const performanceMonitoringService = new PerformanceMonitoringService(
-  new PrismaClient()
-);
+export const performanceMonitoringService = new PerformanceMonitoringService();

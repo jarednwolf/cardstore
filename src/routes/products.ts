@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { asyncHandler } from '../middleware/errorHandler';
 import { ProductService } from '../services/productService';
-import { CreateProductRequest, UpdateProductRequest, ProductSearchQuery } from '../types';
+import { CreateProductRequest, UpdateProductRequest, ProductSearchQuery } from '../types/index';
 
 const router = Router();
 const prisma = new PrismaClient();

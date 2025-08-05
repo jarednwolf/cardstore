@@ -35,12 +35,12 @@ export function createRequestContext(req: AuthenticatedRequest): RequestContext 
 
 export const authMiddleware = async (
   req: AuthenticatedRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Development bypass - allow requests with x-tenant-id header
-    if (env.NODE_ENV === 'development' && req.headers['x-tenant-id']) {
+    // Development and test bypass - allow requests with x-tenant-id header
+    if ((env.NODE_ENV === 'development' || env.NODE_ENV === 'test') && req.headers['x-tenant-id']) {
       req.user = {
         id: 'dev-user',
         tenantId: req.headers['x-tenant-id'] as string,
@@ -71,8 +71,8 @@ export const authMiddleware = async (
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
-    // Development demo token bypass
-    if (env.NODE_ENV === 'development' && token === 'demo-token-for-testing') {
+    // Development and test demo token bypass
+    if ((env.NODE_ENV === 'development' || env.NODE_ENV === 'test') && token === 'demo-token-for-testing') {
       const tenantId = req.headers['x-tenant-id'] as string || 'test-tenant';
       req.user = {
         id: 'demo-user',
@@ -161,7 +161,7 @@ export const authMiddleware = async (
 };
 
 export const requireRole = (requiredRoles: ('owner' | 'manager' | 'staff' | 'fulfillment')[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return (req: AuthenticatedRequest, _res: Response, next: NextFunction): void => {
     if (!req.user) {
       return next(new UnauthorizedError('Authentication required'));
     }
@@ -183,7 +183,7 @@ export const requireRole = (requiredRoles: ('owner' | 'manager' | 'staff' | 'ful
 };
 
 export const requirePermission = (resource: string, action: string) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  return (req: AuthenticatedRequest, _res: Response, next: NextFunction): void => {
     if (!req.user) {
       return next(new UnauthorizedError('Authentication required'));
     }
@@ -207,7 +207,7 @@ export const requirePermission = (resource: string, action: string) => {
 // Optional auth middleware for public endpoints that can benefit from user context
 export const optionalAuth = async (
   req: AuthenticatedRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {

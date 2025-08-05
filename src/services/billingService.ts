@@ -3,9 +3,11 @@ import { prisma } from '../config/database';
 import { logger } from '../config/logger';
 import { getApiCallCount } from '../middleware/apiTracking';
 
-const stripe = new Stripe(process.env['STRIPE_SECRET_KEY']!, {
-  apiVersion: '2025-07-30.basil',
-});
+const stripe = process.env['STRIPE_SECRET_KEY']
+  ? new Stripe(process.env['STRIPE_SECRET_KEY']!, {
+      apiVersion: '2025-07-30.basil',
+    })
+  : null;
 
 export interface SubscriptionPlan {
   id: string;
@@ -64,12 +66,20 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
 ];
 
 export class BillingService {
+  private ensureStripeConfigured(): Stripe {
+    if (!stripe) {
+      throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+    }
+    return stripe;
+  }
+
   /**
    * Create a Stripe customer for a user
    */
   async createCustomer(email: string, name: string, tenantId: string): Promise<Stripe.Customer> {
     try {
-      const customer = await stripe.customers.create({
+      const stripeClient = this.ensureStripeConfigured();
+      const customer = await stripeClient.customers.create({
         email,
         name,
         metadata: {
@@ -100,7 +110,8 @@ export class BillingService {
     tenantId: string
   ): Promise<Stripe.Subscription> {
     try {
-      const subscription = await stripe.subscriptions.create({
+      const stripeClient = this.ensureStripeConfigured();
+      const subscription = await stripeClient.subscriptions.create({
         customer: customerId,
         items: [{ price: priceId }],
         payment_behavior: 'default_incomplete',
@@ -144,7 +155,8 @@ export class BillingService {
    */
   async getSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
     try {
-      return await stripe.subscriptions.retrieve(subscriptionId, {
+      const stripeClient = this.ensureStripeConfigured();
+      return await stripeClient.subscriptions.retrieve(subscriptionId, {
         expand: ['latest_invoice', 'customer']
       });
     } catch (error) {
@@ -158,7 +170,8 @@ export class BillingService {
    */
   async cancelSubscription(subscriptionId: string, tenantId: string): Promise<Stripe.Subscription> {
     try {
-      const subscription = await stripe.subscriptions.update(subscriptionId, {
+      const stripeClient = this.ensureStripeConfigured();
+      const subscription = await stripeClient.subscriptions.update(subscriptionId, {
         cancel_at_period_end: true
       });
 
@@ -185,13 +198,14 @@ export class BillingService {
     tenantId: string
   ): Promise<Stripe.Subscription> {
     try {
-      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const stripeClient = this.ensureStripeConfigured();
+      const subscription = await stripeClient.subscriptions.retrieve(subscriptionId);
       
       if (!subscription.items.data[0]?.id) {
         throw new Error('No subscription items found');
       }
       
-      const updatedSubscription = await stripe.subscriptions.update(subscriptionId, {
+      const updatedSubscription = await stripeClient.subscriptions.update(subscriptionId, {
         items: [{
           id: subscription.items.data[0].id,
           price: newPriceId,
@@ -223,7 +237,8 @@ export class BillingService {
    */
   async createPortalSession(customerId: string, returnUrl: string): Promise<Stripe.BillingPortal.Session> {
     try {
-      return await stripe.billingPortal.sessions.create({
+      const stripeClient = this.ensureStripeConfigured();
+      return await stripeClient.billingPortal.sessions.create({
         customer: customerId,
         return_url: returnUrl,
       });

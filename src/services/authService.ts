@@ -147,7 +147,7 @@ export class AuthService {
   /**
    * Sign out user
    */
-  async signOut(accessToken?: string): Promise<{ success: boolean; error?: string }> {
+  async signOut(_accessToken?: string): Promise<{ success: boolean; error?: string }> {
     try {
       if (!isSupabaseConfigured() || !supabase) {
         return { success: false, error: 'Authentication service not configured' };

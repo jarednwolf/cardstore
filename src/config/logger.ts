@@ -1,7 +1,7 @@
 import winston from 'winston';
 
-const logLevel = process.env.LOG_LEVEL || 'info';
-const logFormat = process.env.LOG_FORMAT || 'json';
+const logLevel = process.env['LOG_LEVEL'] || 'info';
+const logFormat = process.env['LOG_FORMAT'] || 'json';
 
 // Define log format
 const customFormat = winston.format.combine(
@@ -28,7 +28,7 @@ export const logger = winston.createLogger({
   format: logFormat === 'json' ? customFormat : consoleFormat,
   defaultMeta: {
     service: 'deckstack',
-    environment: process.env.NODE_ENV || 'development',
+    environment: process.env['NODE_ENV'] || 'development',
   },
   transports: [
     // Console transport
@@ -39,7 +39,7 @@ export const logger = winston.createLogger({
 });
 
 // Add file transport in production
-if (process.env.NODE_ENV === 'production') {
+if (process.env['NODE_ENV'] === 'production') {
   logger.add(
     new winston.transports.File({
       filename: 'logs/error.log',

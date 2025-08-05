@@ -31,7 +31,7 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
   };
 
   const result = await productService.searchProducts(tenantId, query);
-  res.json({ data: result });
+  res.json({ data: result.products, pagination: result.pagination });
 }));
 
 // Get product by ID

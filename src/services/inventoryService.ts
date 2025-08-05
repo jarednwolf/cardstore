@@ -462,8 +462,7 @@ export class InventoryService {
         await tx.inventoryReservation.update({
           where: { id: reservation.id },
           data: {
-            status: 'cancelled',
-            updatedAt: new Date()
+            status: 'cancelled'
           }
         });
 

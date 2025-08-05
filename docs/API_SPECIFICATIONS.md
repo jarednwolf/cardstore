@@ -1027,6 +1027,164 @@ GET /webhooks/logs
 POST /webhooks/logs/{id}/retry
 ```
 
+## Phase 4 API Endpoints
+
+### Marketplace Management
+
+#### Initialize Marketplace Connector
+```http
+POST /api/v1/marketplace/connectors/{type}/initialize
+Authorization: Bearer <token>
+X-Tenant-ID: <tenant-id>
+Content-Type: application/json
+
+{
+  "config": {
+    "apiKey": "string",
+    "secretKey": "string",
+    "sellerId": "string"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "connectorId": "string",
+    "type": "amazon|google_shopping",
+    "status": "active",
+    "lastSync": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+#### Test Marketplace Connector
+```http
+POST /api/v1/marketplace/connectors/{type}/test
+Authorization: Bearer <token>
+X-Tenant-ID: <tenant-id>
+```
+
+#### Sync Products to Marketplace
+```http
+POST /api/v1/marketplace/products/sync
+Authorization: Bearer <token>
+X-Tenant-ID: <tenant-id>
+Content-Type: application/json
+
+{
+  "productIds": ["string"],
+  "marketplaces": ["amazon", "google_shopping"]
+}
+```
+
+### Advanced Pricing Management
+
+#### Create Pricing Rule
+```http
+POST /api/v1/pricing/rules
+Authorization: Bearer <token>
+X-Tenant-ID: <tenant-id>
+Content-Type: application/json
+
+{
+  "name": "Competitive Pricing Rule",
+  "description": "Adjust prices based on competitor analysis",
+  "priority": 100,
+  "isActive": true,
+  "conditions": [
+    {
+      "type": "competitor_price",
+      "operator": "less_than",
+      "value": "current_price",
+      "marketplace": "amazon"
+    }
+  ],
+  "actions": [
+    {
+      "type": "adjust_price",
+      "value": -0.05,
+      "unit": "percentage",
+      "min_margin": 0.15
+    }
+  ]
+}
+```
+
+#### Get Pricing Rules
+```http
+GET /api/v1/pricing/rules?isActive=true&page=1&limit=20
+Authorization: Bearer <token>
+X-Tenant-ID: <tenant-id>
+```
+
+#### Apply Pricing Rules to Product
+```http
+POST /api/v1/pricing/products/{productId}/apply-rules
+Authorization: Bearer <token>
+X-Tenant-ID: <tenant-id>
+Content-Type: application/json
+
+{
+  "marketplaces": ["amazon", "google_shopping"]
+}
+```
+
+#### Get Market Prices
+```http
+GET /api/v1/pricing/products/{productId}/market-prices
+Authorization: Bearer <token>
+X-Tenant-ID: <tenant-id>
+```
+
+#### Get Pricing Analytics
+```http
+GET /api/v1/pricing/analytics?startDate=2024-01-01&endDate=2024-01-31
+Authorization: Bearer <token>
+X-Tenant-ID: <tenant-id>
+```
+
+### Performance Monitoring
+
+#### Get Performance Metrics
+```http
+GET /api/v1/performance/metrics
+Authorization: Bearer <token>
+X-Tenant-ID: <tenant-id>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "apiResponseTime": {
+      "average": 150,
+      "p95": 300,
+      "p99": 500
+    },
+    "databasePerformance": {
+      "queryTime": 50,
+      "connectionPool": {
+        "active": 5,
+        "idle": 10,
+        "total": 15
+      }
+    },
+    "cachePerformance": {
+      "hitRatio": 0.85,
+      "missRatio": 0.15
+    },
+    "systemHealth": {
+      "score": 95,
+      "status": "healthy"
+    }
+  }
+}
+```
+
 ## Error Handling
 
 ### HTTP Status Codes

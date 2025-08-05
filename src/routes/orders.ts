@@ -20,6 +20,7 @@ function getRequestContext(req: Request): RequestContext {
   return {
     userId: (req as any).user?.id || 'dev-user',
     tenantId: (req as any).tenantId || 'default-tenant',
+    userRole: (req as any).user?.role || 'manager',
     correlationId: req.headers['x-correlation-id'] as string || `req-${Date.now()}`,
     userAgent: req.headers['user-agent'] || 'unknown',
     ipAddress: req.ip || 'unknown'

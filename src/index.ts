@@ -7,7 +7,7 @@ import { env } from './config/env';
 import { logger } from './config/logger';
 import { prisma } from './config/database';
 import { errorHandler } from './middleware/errorHandler';
-import { requestLogger } from './middleware/requestLogger';
+// import { requestLogger } from './middleware/requestLogger';
 import { correlationIdMiddleware, correlationErrorMiddleware } from './middleware/correlationId';
 import { apiTrackingMiddleware } from './middleware/apiTracking';
 import { authMiddleware } from './middleware/auth';
@@ -28,6 +28,8 @@ import userRoutes from './routes/users';
 import { billingRoutes } from './routes/billing';
 import { transferRoutes } from './routes/transfers';
 import { analyticsRoutes } from './routes/analytics';
+import pricingRoutes from './routes/pricing';
+import marketplaceRoutes from './routes/marketplace';
 
 class Application {
   public app: express.Application;
@@ -150,13 +152,15 @@ class Application {
     apiRouter.use('/inventory', inventoryRoutes);
     apiRouter.use('/transfers', transferRoutes);
     apiRouter.use('/analytics', analyticsRoutes);
+    apiRouter.use('/pricing', pricingRoutes);
+    apiRouter.use('/marketplace', marketplaceRoutes);
     apiRouter.use('/orders', orderRoutes);
     apiRouter.use('/shipping', shippingRoutes);
 
     this.app.use(`/api/${env.API_VERSION}`, apiRouter);
 
     // Simple WebSocket endpoint (returns 200 for now)
-    this.app.get('/ws', (req, res) => {
+    this.app.get('/ws', (_req, res) => {
       res.status(200).json({
         message: 'WebSocket endpoint - upgrade to WebSocket not implemented yet',
         timestamp: new Date().toISOString()
@@ -164,7 +168,7 @@ class Application {
     });
 
     // Serve frontend for all other routes (SPA fallback)
-    this.app.get('*', (req, res) => {
+    this.app.get('*', (_req, res) => {
       res.sendFile('index.html', { root: 'frontend' });
     });
   }

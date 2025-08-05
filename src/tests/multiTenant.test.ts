@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import { PrismaClient } from '@prisma/client';
 import { app } from '../index';
@@ -53,7 +53,16 @@ describe('Multi-Tenant Security and Data Isolation', () => {
   });
 
   afterAll(async () => {
-    // Cleanup test data
+    // Cleanup test data in correct order (foreign key constraints)
+    await prisma.product.deleteMany({
+      where: {
+        OR: [
+          { tenantId: tenant1.id },
+          { tenantId: tenant2.id }
+        ]
+      }
+    });
+
     await prisma.user.deleteMany({
       where: {
         OR: [
@@ -96,6 +105,16 @@ describe('Multi-Tenant Security and Data Isolation', () => {
     });
 
     test('should only return tenant-scoped data', async () => {
+      // Clean up any existing products first
+      await prisma.product.deleteMany({
+        where: {
+          OR: [
+            { tenantId: tenant1.id },
+            { tenantId: tenant2.id }
+          ]
+        }
+      });
+
       // Create products for both tenants
       await prisma.product.createMany({
         data: [
@@ -207,7 +226,7 @@ describe('Multi-Tenant Security and Data Isolation', () => {
 
     test('should prevent tenant settings modification by non-owners', async () => {
       // Create a staff user
-      const staffUser = await userService.createUser({
+      await userService.createUser({
         email: 'staff@test.com',
         name: 'Staff User',
         role: 'staff',
@@ -250,9 +269,11 @@ describe('Multi-Tenant Security and Data Isolation', () => {
       });
 
       expect(auditLogs.logs.length).toBeGreaterThan(0);
-      expect(auditLogs.logs[0].tenantId).toBe(tenant1.id);
-      expect(auditLogs.logs[0].action).toBe('create');
-      expect(auditLogs.logs[0].resource).toBe('product');
+      if (auditLogs.logs.length > 0 && auditLogs.logs[0]) {
+        expect(auditLogs.logs[0].tenantId).toBe(tenant1.id);
+        expect(auditLogs.logs[0].action).toBe('create');
+        expect(auditLogs.logs[0].resource).toBe('product');
+      }
     });
 
     test('should not expose audit logs across tenants', async () => {
@@ -355,8 +376,8 @@ describe('Multi-Tenant Security and Data Isolation', () => {
       const responses = await Promise.all(requests);
       
       // Should eventually hit rate limit
-      const rateLimited = responses.some((r: any) => r.status === 429);
       // Note: This might not trigger in test environment
+      responses.some((r: any) => r.status === 429);
     });
 
     test('should include security headers', async () => {
@@ -424,36 +445,35 @@ describe('Multi-Tenant Security and Data Isolation', () => {
       expect([401, 403]).toContain(response.status);
     });
   });
-});
+  describe('Performance and Scalability', () => {
+    test('should handle concurrent tenant operations', async () => {
+      const concurrentRequests = Array.from({ length: 5 }, () =>
+        request(app)
+          .get('/api/v1/products')
+          .set('Authorization', `Bearer ${token1}`)
+          .set('X-Tenant-ID', tenant1.id)
+      );
 
-describe('Performance and Scalability', () => {
-  test('should handle concurrent tenant operations', async () => {
-    const concurrentRequests = Array.from({ length: 5 }, (_, i) =>
-      request(app)
+      const responses = await Promise.all(concurrentRequests);
+      
+      // All requests should succeed
+      responses.forEach(response => {
+        expect(response.status).toBe(200);
+      });
+    });
+
+    test('should efficiently query tenant-scoped data', async () => {
+      const startTime = Date.now();
+      
+      await request(app)
         .get('/api/v1/products')
         .set('Authorization', `Bearer ${token1}`)
-        .set('X-Tenant-ID', tenant1.id)
-    );
-
-    const responses = await Promise.all(concurrentRequests);
-    
-    // All requests should succeed
-    responses.forEach(response => {
-      expect(response.status).toBe(200);
+        .set('X-Tenant-ID', tenant1.id);
+      
+      const duration = Date.now() - startTime;
+      
+      // Should complete within reasonable time (adjust threshold as needed)
+      expect(duration).toBeLessThan(1000);
     });
-  });
-
-  test('should efficiently query tenant-scoped data', async () => {
-    const startTime = Date.now();
-    
-    await request(app)
-      .get('/api/v1/products')
-      .set('Authorization', `Bearer ${token1}`)
-      .set('X-Tenant-ID', tenant1.id);
-    
-    const duration = Date.now() - startTime;
-    
-    // Should complete within reasonable time (adjust threshold as needed)
-    expect(duration).toBeLessThan(1000);
   });
 });

@@ -4,7 +4,7 @@ import { env } from '../config/env';
 import { logger } from '../config/logger';
 import { ForbiddenError, ValidationError } from './errorHandler';
 import { AuthenticatedRequest } from './auth';
-import { Tenant } from '../types';
+// import { Tenant } from '../types';
 
 const prisma = new PrismaClient();
 
@@ -52,11 +52,12 @@ export const tenantMiddleware = (
       throw new ValidationError('Tenant ID is required');
     }
 
-    // Validate tenant ID format (UUID or development format)
+    // Validate tenant ID format (UUID, CUID, or development format)
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    const isValidDevTenant = env.NODE_ENV === 'development' && /^[a-zA-Z0-9-_]+$/.test(tenantId);
+    const cuidRegex = /^c[a-z0-9]{24}$/; // CUID format: c + 24 alphanumeric characters
+    const isValidDevTenant = (env.NODE_ENV === 'development' || env.NODE_ENV === 'test') && /^[a-zA-Z0-9-_]+$/.test(tenantId);
     
-    if (tenantId !== env.DEFAULT_TENANT_ID && !uuidRegex.test(tenantId) && !isValidDevTenant) {
+    if (tenantId !== env.DEFAULT_TENANT_ID && !uuidRegex.test(tenantId) && !cuidRegex.test(tenantId) && !isValidDevTenant) {
       throw new ValidationError('Invalid tenant ID format');
     }
 
@@ -91,7 +92,7 @@ export const tenantMiddleware = (
 // Middleware to validate tenant exists and is active
 export const validateTenant = async (
   req: TenantRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {

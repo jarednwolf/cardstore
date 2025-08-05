@@ -74,6 +74,12 @@ export class ServiceUnavailableError extends AppError {
   }
 }
 
+export class BadRequestError extends AppError {
+  constructor(message: string = 'Bad request', details?: any) {
+    super(message, 400, true, 'BAD_REQUEST', details);
+  }
+}
+
 // Error response interface
 interface ErrorResponse {
   error: {
@@ -96,7 +102,7 @@ export const errorHandler = (
   error: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   const requestId = req.headers['x-request-id'] as string || generateRequestId();
   const correlationId = req.headers['x-correlation-id'] as string || requestId;
@@ -234,7 +240,7 @@ export const asyncHandler = (fn: Function) => {
 };
 
 // Not found handler
-export const notFoundHandler = (req: Request, res: Response, next: NextFunction): void => {
+export const notFoundHandler = (req: Request, _res: Response, next: NextFunction): void => {
   const error = new NotFoundError(`Route ${req.method} ${req.path} not found`);
   next(error);
 };

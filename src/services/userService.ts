@@ -31,11 +31,11 @@ export interface UserInvitation {
 export interface UserProfile {
   id: string;
   email: string;
-  name?: string;
+  name: string | undefined;
   role: string;
   tenantId: string;
   isActive: boolean;
-  lastLoginAt?: Date;
+  lastLoginAt: Date | undefined;
   createdAt: Date;
   updatedAt: Date;
   permissions: string[];
@@ -94,7 +94,7 @@ export class UserService {
           email: data.email,
           role: data.role,
           tenantId: data.tenantId,
-          invitedBy: context?.userId || 'system'
+          invitedBy: 'system'
         });
       }
 
@@ -175,11 +175,11 @@ export class UserService {
       return {
         id: user.id,
         email: user.email,
-        name: user.name,
+        name: user.name || undefined,
         role: user.role,
         tenantId: user.tenantId,
         isActive: user.isActive,
-        lastLoginAt: user.lastLoginAt,
+        lastLoginAt: user.lastLoginAt || undefined,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         permissions: permissions.roles,
@@ -459,10 +459,10 @@ export class UserService {
       id: user.id,
       tenantId: user.tenantId,
       email: user.email,
-      name: user.name,
+      name: user.name || undefined,
       role: user.role,
       isActive: user.isActive,
-      lastLoginAt: user.lastLoginAt,
+      lastLoginAt: user.lastLoginAt || undefined,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     };

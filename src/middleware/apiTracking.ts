@@ -64,7 +64,7 @@ export function apiTrackingMiddleware() {
             endpoint: normalizeEndpoint(req.path),
             statusCode: res.statusCode,
             responseTime,
-            userAgent: req.headers['user-agent'] || undefined,
+            userAgent: req.headers['user-agent'] as string | undefined,
             ipAddress: getClientIpAddress(req),
             correlationId
           });
@@ -98,7 +98,7 @@ async function logApiCall(data: {
   endpoint: string;
   statusCode: number;
   responseTime: number;
-  userAgent?: string;
+  userAgent?: string | undefined;
   ipAddress?: string;
   correlationId?: string;
 }): Promise<void> {
@@ -108,6 +108,34 @@ async function logApiCall(data: {
   }
 
   try {
+    // First verify the tenant exists to avoid foreign key constraint violations
+    const tenantExists = await prisma.tenant.findUnique({
+      where: { id: data.tenantId },
+      select: { id: true }
+    });
+
+    if (!tenantExists) {
+      logger.debug('Skipping API call log for non-existent tenant', {
+        tenantId: data.tenantId,
+        endpoint: data.endpoint
+      });
+      return;
+    }
+
+    // Verify user exists if userId is provided
+    if (data.userId) {
+      const userExists = await prisma.user.findUnique({
+        where: { id: data.userId },
+        select: { id: true }
+      });
+
+      if (!userExists) {
+        // Create a new data object without userId if user doesn't exist
+        const { userId: _, ...dataWithoutUserId } = data;
+        data = dataWithoutUserId as typeof data;
+      }
+    }
+
     await prisma.apiCallLog.create({
       data: {
         tenantId: data.tenantId,

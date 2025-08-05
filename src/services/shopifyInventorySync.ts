@@ -262,9 +262,22 @@ export class ShopifyInventorySyncService {
           const syncContext = context || {
             userId: 'system',
             tenantId,
-            userRole: 'system',
+            userRole: 'owner',
             correlationId: `bulk-sync-${Date.now()}`,
-            timestamp: new Date()
+            timestamp: new Date(),
+            user: {
+              id: 'system',
+              email: 'system@system.local',
+              name: 'System',
+              role: 'owner',
+              tenantId,
+              isActive: true,
+              lastLoginAt: new Date(),
+              createdAt: new Date(),
+              updatedAt: new Date()
+            },
+            ipAddress: '127.0.0.1',
+            userAgent: 'system'
           };
 
           const result = await this.syncInventoryToShopify(
@@ -465,7 +478,7 @@ export class ShopifyInventorySyncService {
         shopifyLocationId: record.shopifyLocationId,
         lastSyncAt: record.syncedAt,
         syncStatus: record.status as 'pending' | 'syncing' | 'completed' | 'failed',
-        errorMessage: record.errorMessage || undefined,
+        errorMessage: record.errorMessage || '',
         retryCount: record.retryCount
       }));
     } catch (error) {

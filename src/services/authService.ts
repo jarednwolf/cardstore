@@ -1,4 +1,5 @@
 import { supabase, supabaseAdmin, isSupabaseConfigured } from '../config/supabase';
+import { devAuthService } from './devAuthService';
 import { logger } from '../config/logger';
 import { User } from '../types';
 
@@ -29,7 +30,8 @@ export class AuthService {
   async signUp(data: SignUpData): Promise<AuthResult> {
     try {
       if (!isSupabaseConfigured() || !supabase) {
-        return { success: false, error: 'Authentication service not configured' };
+        logger.info('Using development authentication service for signup');
+        return await devAuthService.signUp(data);
       }
 
       const { email, password, fullName, tenantName, tenantSubdomain } = data;
@@ -103,7 +105,8 @@ export class AuthService {
   async signIn(data: SignInData): Promise<AuthResult> {
     try {
       if (!isSupabaseConfigured() || !supabase) {
-        return { success: false, error: 'Authentication service not configured' };
+        logger.info('Using development authentication service for signin');
+        return await devAuthService.signIn(data);
       }
 
       const { email, password } = data;
@@ -147,10 +150,11 @@ export class AuthService {
   /**
    * Sign out user
    */
-  async signOut(_accessToken?: string): Promise<{ success: boolean; error?: string }> {
+  async signOut(accessToken?: string): Promise<{ success: boolean; error?: string }> {
     try {
       if (!isSupabaseConfigured() || !supabase) {
-        return { success: false, error: 'Authentication service not configured' };
+        logger.info('Using development authentication service for signout');
+        return await devAuthService.signOut(accessToken);
       }
 
       const { error } = await supabase.auth.signOut();
@@ -174,7 +178,8 @@ export class AuthService {
   async refreshToken(refreshToken: string): Promise<AuthResult> {
     try {
       if (!isSupabaseConfigured() || !supabase) {
-        return { success: false, error: 'Authentication service not configured' };
+        logger.info('Using development authentication service for token refresh');
+        return await devAuthService.refreshToken(refreshToken);
       }
 
       const { data, error } = await supabase.auth.refreshSession({
@@ -214,8 +219,8 @@ export class AuthService {
   async getUserById(userId: string): Promise<User | null> {
     try {
       if (!isSupabaseConfigured() || !supabaseAdmin) {
-        logger.error('Supabase admin client not configured');
-        return null;
+        logger.info('Using development authentication service for getUserById');
+        return await devAuthService.getUserById(userId);
       }
 
       const { data, error } = await supabaseAdmin
@@ -265,8 +270,8 @@ export class AuthService {
   async verifyToken(accessToken: string): Promise<User | null> {
     try {
       if (!isSupabaseConfigured() || !supabase) {
-        logger.error('Supabase client not configured');
-        return null;
+        logger.info('Using development authentication service for token verification');
+        return await devAuthService.verifyToken(accessToken);
       }
 
       const { data, error } = await supabase.auth.getUser(accessToken);

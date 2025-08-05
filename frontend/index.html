@@ -1005,7 +1005,7 @@
                 <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="loginForm">
+                <form id="loginForm" onsubmit="handleLogin(event)">
                     <div class="form-group">
                         <label for="loginEmail">Email</label>
                         <input type="email" id="loginEmail" required>
@@ -1018,7 +1018,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-modal secondary" onclick="closeModal('loginModal')">Cancel</button>
-                <button class="btn-modal primary" onclick="handleLogin()">Sign In</button>
+                <button class="btn-modal primary" type="submit" form="loginForm">Sign In</button>
             </div>
         </div>
     </div>
@@ -1031,7 +1031,7 @@
                 <button class="modal-close" onclick="closeModal('signupModal')">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="signupForm">
+                <form id="signupForm" onsubmit="handleSignup(event)">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="signupFirstName">First Name</label>
@@ -1068,7 +1068,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-modal secondary" onclick="closeModal('signupModal')">Cancel</button>
-                <button class="btn-modal primary" onclick="handleSignup()">Start Free Trial</button>
+                <button class="btn-modal primary" type="submit" form="signupForm">Start Free Trial</button>
             </div>
         </div>
     </div>
@@ -1184,6 +1184,82 @@
     </div>
 
     <script>
+        // Notification function
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existing = document.querySelector('.notification');
+            if (existing) {
+                existing.remove();
+            }
+
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            // Add styles
+            notification.style.cssText = `
+                position: fixed;
+                top: 2rem;
+                right: 2rem;
+                background: ${type === 'error' ? '#fee2e2' : type === 'success' ? '#d1fae5' : '#dbeafe'};
+                color: ${type === 'error' ? '#dc2626' : type === 'success' ? '#059669' : '#2563eb'};
+                border: 1px solid ${type === 'error' ? '#fecaca' : type === 'success' ? '#a7f3d0' : '#93c5fd'};
+                border-radius: 0.5rem;
+                padding: 1rem;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                max-width: 400px;
+                animation: slideIn 0.3s ease-out;
+            `;
+
+            // Add animation styles if not already present
+            if (!document.querySelector('#notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    .notification-content {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                    }
+                    .notification-close {
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        padding: 0.25rem;
+                        margin-left: auto;
+                        opacity: 0.7;
+                    }
+                    .notification-close:hover {
+                        opacity: 1;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
         // Modal Functions
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
@@ -1209,18 +1285,63 @@
             openModal('architectureModal');
         }
 
-        function handleLogin() {
+        async function handleLogin(event) {
+            if (event) {
+                event.preventDefault();
+            }
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             
-            if (email && password) {
-                // Simulate login process
-                alert('Login functionality will redirect to the dashboard. For demo purposes, this would authenticate with the backend.');
-                closeModal('loginModal');
-                // In a real app, this would redirect to dashboard.html or make an API call
-                // window.location.href = 'dashboard.html';
-            } else {
-                alert('Please fill in all fields.');
+            if (!email || !password) {
+                showNotification('Please fill in all fields.', 'error');
+                return;
+            }
+
+            // Show loading state
+            const loginBtn = document.querySelector('#loginModal .btn-modal.primary');
+            const originalText = loginBtn.textContent;
+            loginBtn.textContent = 'Signing in...';
+            loginBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.data) {
+                    // Store authentication data
+                    if (data.data.session && data.data.session.access_token) {
+                        localStorage.setItem('deckstack_token', data.data.session.access_token);
+                        localStorage.setItem('deckstack_refresh_token', data.data.session.refresh_token);
+                    }
+                    localStorage.setItem('deckstack_user', JSON.stringify(data.data.user));
+
+                    showNotification('Welcome back! Redirecting to your dashboard...', 'success');
+                    closeModal('loginModal');
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 1500);
+                } else {
+                    showNotification(data.error?.message || 'Invalid email or password. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotification('Unable to sign in. Please check your connection and try again.', 'error');
+            } finally {
+                // Reset button state
+                loginBtn.textContent = originalText;
+                loginBtn.disabled = false;
             }
         }
 
@@ -1278,7 +1399,10 @@
             return isValid;
         }
 
-        function handleSignup() {
+        async function handleSignup(event) {
+            if (event) {
+                event.preventDefault();
+            }
             if (!validateForm()) {
                 return;
             }
@@ -1288,12 +1412,68 @@
             const email = document.getElementById('signupEmail').value;
             const company = document.getElementById('signupCompany').value;
             const password = document.getElementById('signupPassword').value;
-            
-            // Simulate signup process
-            alert(`Account creation successful for ${firstName} ${lastName}! In a real application, this would create your tenant and redirect to the onboarding flow.`);
-            closeModal('signupModal');
-            // In a real app, this would make an API call to create the account
-            // window.location.href = 'dashboard.html?onboarding=true';
+
+            // Show loading state
+            const signupBtn = document.querySelector('#signupModal .btn-modal.primary');
+            const originalText = signupBtn.textContent;
+            signupBtn.textContent = 'Creating account...';
+            signupBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        fullName: `${firstName} ${lastName}`,
+                        tenantName: company,
+                        tenantSubdomain: generateSubdomain(company),
+                        metadata: {
+                            firstName,
+                            lastName,
+                            company
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.data) {
+                    // Store authentication data
+                    if (data.data.session && data.data.session.access_token) {
+                        localStorage.setItem('deckstack_token', data.data.session.access_token);
+                        localStorage.setItem('deckstack_refresh_token', data.data.session.refresh_token);
+                    }
+                    localStorage.setItem('deckstack_user', JSON.stringify(data.data.user));
+
+                    showNotification('Account created successfully! Setting up your workspace...', 'success');
+                    closeModal('signupModal');
+                    
+                    // Redirect to onboarding flow for new users
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html?view=onboarding&step=welcome';
+                    }, 1500);
+                } else {
+                    showNotification(data.error?.message || 'Unable to create account. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showNotification('Unable to create account. Please check your connection and try again.', 'error');
+            } finally {
+                // Reset button state
+                signupBtn.textContent = originalText;
+                signupBtn.disabled = false;
+            }
+        }
+
+        function generateSubdomain(companyName) {
+            return companyName
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '')
+                .substring(0, 20);
         }
 
         // Close modal when clicking outside

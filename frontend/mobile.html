@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DeckStack">
+    
+    <title>DeckStack Mobile - Card Store Operations</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/mobile.css">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/js/mobile.js" as="script">
+    <link rel="preload" href="/js/scanner.js" as="script">
+</head>
+<body class="mobile-body">
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-header-content">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            
+            <h1 class="mobile-header-title">DeckStack</h1>
+            
+            <button class="mobile-search-btn" id="mobileSearchBtn">
+                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Connection Status Indicator -->
+        <div class="connection-status" id="connectionStatus">
+            <div class="status-indicator online" id="statusIndicator"></div>
+            <span class="status-text" id="statusText">Online</span>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <nav class="mobile-drawer" id="mobileDrawer">
+        <div class="mobile-drawer-header">
+            <h2>Menu</h2>
+            <button class="mobile-drawer-close" id="drawerCloseBtn">
+                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        
+        <ul class="mobile-drawer-menu">
+            <li><a href="#dashboard" class="mobile-drawer-item active">
+                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21V5a2 2 0 012-2h4a2 2 0 012 2v16"/>
+                </svg>
+                Dashboard
+            </a></li>
+            
+            <li><a href="#inventory" class="mobile-drawer-item">
+                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                Inventory
+            </a></li>
+            
+            <li><a href="#orders" class="mobile-drawer-item">
+                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                Orders
+            </a></li>
+            
+            <li><a href="#scanner" class="mobile-drawer-item">
+                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+                Scanner
+            </a></li>
+            
+            <li><a href="#analytics" class="mobile-drawer-item">
+                <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Analytics
+            </a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="mobile-main" id="mobileMain">
+        <!-- Dashboard View -->
+        <section class="mobile-view active" id="dashboardView">
+            <div class="mobile-view-header">
+                <h2>Dashboard</h2>
+                <button class="mobile-refresh-btn" id="refreshDashboard">
+                    <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Quick Stats Cards -->
+            <div class="mobile-stats-grid">
+                <div class="mobile-stat-card">
+                    <div class="stat-icon orders">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="todayOrders">--</div>
+                        <div class="stat-label">Orders Today</div>
+                    </div>
+                </div>
+                
+                <div class="mobile-stat-card">
+                    <div class="stat-icon revenue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="todayRevenue">--</div>
+                        <div class="stat-label">Revenue Today</div>
+                    </div>
+                </div>
+                
+                <div class="mobile-stat-card">
+                    <div class="stat-icon inventory">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="lowStockItems">--</div>
+                        <div class="stat-label">Low Stock</div>
+                    </div>
+                </div>
+                
+                <div class="mobile-stat-card">
+                    <div class="stat-icon users">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="activeUsers">--</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="mobile-section">
+                <h3>Recent Activity</h3>
+                <div class="activity-list" id="recentActivity">
+                    <div class="activity-item skeleton-loader"></div>
+                    <div class="activity-item skeleton-loader"></div>
+                    <div class="activity-item skeleton-loader"></div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="mobile-section">
+                <h3>Quick Actions</h3>
+                <div class="quick-actions-grid">
+                    <button class="quick-action-btn" data-action="scan">
+                        <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                        </svg>
+                        Scan Item
+                    </button>
+                    
+                    <button class="quick-action-btn" data-action="add-inventory">
+                        <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Add Inventory
+                    </button>
+                    
+                    <button class="quick-action-btn" data-action="process-orders">
+                        <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        Process Orders
+                    </button>
+                    
+                    <button class="quick-action-btn" data-action="view-analytics">
+                        <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        View Analytics
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scanner View -->
+        <section class="mobile-view" id="scannerView">
+            <div class="scanner-container" id="scannerContainer">
+                <video class="scanner-video" id="scannerVideo" autoplay muted playsinline></video>
+                
+                <div class="scanner-overlay">
+                    <div class="scanner-frame"></div>
+                    <div class="scanner-instructions">
+                        <p>Position barcode within the frame</p>
+                    </div>
+                </div>
+                
+                <div class="scanner-controls">
+                    <button class="scanner-btn" id="toggleFlash" title="Toggle Flash">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="scanner-btn primary" id="captureBtn" title="Capture">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="scanner-btn" id="closeScannerBtn" title="Close">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Scan Result Modal -->
+                <div class="scan-result-modal" id="scanResultModal">
+                    <div class="scan-result-content">
+                        <div class="scan-result-header">
+                            <h3>Scan Result</h3>
+                            <button class="close-btn" id="closeScanResult">×</button>
+                        </div>
+                        
+                        <div class="scan-result-body" id="scanResultBody">
+                            <!-- Dynamic content will be inserted here -->
+                        </div>
+                        
+                        <div class="scan-result-actions">
+                            <button class="mobile-btn mobile-btn-secondary" id="scanAgainBtn">Scan Again</button>
+                            <button class="mobile-btn mobile-btn-primary" id="updateInventoryBtn">Update Inventory</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory View -->
+        <section class="mobile-view" id="inventoryView">
+            <div class="mobile-view-header">
+                <h2>Inventory</h2>
+                <button class="mobile-filter-btn" id="inventoryFilterBtn">
+                    <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="mobile-search-bar">
+                <input type="text" class="mobile-search-input" placeholder="Search products..." id="inventorySearch">
+                <button class="mobile-search-submit" id="inventorySearchBtn">
+                    <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Inventory List -->
+            <div class="inventory-list" id="inventoryList">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            
+            <!-- Load More Button -->
+            <button class="mobile-btn mobile-btn-secondary load-more-btn" id="loadMoreInventory" style="display: none;">
+                Load More
+            </button>
+        </section>
+
+        <!-- Orders View -->
+        <section class="mobile-view" id="ordersView">
+            <div class="mobile-view-header">
+                <h2>Orders</h2>
+                <button class="mobile-filter-btn" id="ordersFilterBtn">
+                    <svg class="mobile-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Order Status Tabs -->
+            <div class="mobile-tabs">
+                <button class="mobile-tab active" data-status="pending">Pending</button>
+                <button class="mobile-tab" data-status="processing">Processing</button>
+                <button class="mobile-tab" data-status="fulfilled">Fulfilled</button>
+            </div>
+            
+            <!-- Orders List -->
+            <div class="orders-list" id="ordersList">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Analytics View -->
+        <section class="mobile-view" id="analyticsView">
+            <div class="mobile-view-header">
+                <h2>Analytics</h2>
+                <select class="mobile-select" id="analyticsTimeframe">
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month" selected>This Month</option>
+                    <option value="quarter">This Quarter</option>
+                </select>
+            </div>
+            
+            <!-- Analytics Charts -->
+            <div class="analytics-charts" id="analyticsCharts">
+                <!-- Charts will be rendered here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <a href="#dashboard" class="mobile-nav-item active" data-view="dashboard">
+            <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21V5a2 2 0 012-2h4a2 2 0 012 2v16"/>
+            </svg>
+            <span>Dashboard</span>
+        </a>
+        
+        <a href="#inventory" class="mobile-nav-item" data-view="inventory">
+            <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            <span>Inventory</span>
+        </a>
+        
+        <a href="#scanner" class="mobile-nav-item scanner-nav" data-view="scanner">
+            <div class="scanner-nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+            </div>
+            <span>Scan</span>
+        </a>
+        
+        <a href="#orders" class="mobile-nav-item" data-view="orders">
+            <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            <span>Orders</span>
+        </a>
+        
+        <a href="#analytics" class="mobile-nav-item" data-view="analytics">
+            <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <span>Analytics</span>
+        </a>
+    </nav>
+
+    <!-- Floating Action Button -->
+    <button class="mobile-fab" id="mobileFab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+    </button>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="/js/api.js"></script>
+    <script src="/js/scanner.js"></script>
+    <script src="/js/mobile.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

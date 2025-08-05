@@ -1,33 +1,20 @@
 import { logger } from '../config/logger';
-import { User } from '../types';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-
-export interface AuthResult {
-  success: boolean;
-  user?: User;
-  error?: string;
-  session?: any;
-}
-
-export interface SignUpData {
-  email: string;
-  password: string;
-  fullName?: string;
-  tenantName?: string;
-  tenantSubdomain?: string;
-}
-
-export interface SignInData {
-  email: string;
-  password: string;
-}
+import {
+  AuthResult,
+  SignUpData,
+  SignInData,
+  User,
+  AuthServiceInterface,
+  AuthSession
+} from '../types/auth';
 
 // In-memory storage for development (replace with database in production)
 const users: Map<string, any> = new Map();
 const sessions: Map<string, any> = new Map();
 
-export class DevAuthService {
+export class DevAuthService implements AuthServiceInterface {
   private jwtSecret: string;
 
   constructor() {
@@ -294,7 +281,7 @@ export class DevAuthService {
   /**
    * Create session tokens
    */
-  private createSession(user: any) {
+  private createSession(user: any): AuthSession {
     const payload = {
       id: user.id,
       email: user.email,

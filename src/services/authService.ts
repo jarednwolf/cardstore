@@ -1,29 +1,16 @@
 import { supabase, supabaseAdmin, isSupabaseConfigured } from '../config/supabase';
 import { devAuthService } from './devAuthService';
 import { logger } from '../config/logger';
-import { User } from '../types';
+import {
+  AuthResult,
+  SignUpData,
+  SignInData,
+  User,
+  AuthServiceInterface,
+  TenantInvitationResult
+} from '../types/auth';
 
-export interface AuthResult {
-  success: boolean;
-  user?: User;
-  error?: string;
-  session?: any;
-}
-
-export interface SignUpData {
-  email: string;
-  password: string;
-  fullName?: string;
-  tenantName?: string;
-  tenantSubdomain?: string;
-}
-
-export interface SignInData {
-  email: string;
-  password: string;
-}
-
-export class AuthService {
+export class AuthService implements AuthServiceInterface {
   /**
    * Sign up a new user and optionally create a tenant
    */
@@ -87,11 +74,21 @@ export class AuthService {
         return { success: false, error: 'User data not found' };
       }
 
-      return {
+      const result: AuthResult = {
         success: true,
-        user,
-        session: authData.session
+        user
       };
+      
+      if (authData.session) {
+        result.session = {
+          access_token: authData.session.access_token,
+          refresh_token: authData.session.refresh_token,
+          expires_in: authData.session.expires_in || 3600,
+          token_type: 'Bearer'
+        };
+      }
+      
+      return result;
 
     } catch (error) {
       logger.error('Auth service signup error', { error });
@@ -135,11 +132,21 @@ export class AuthService {
         return { success: false, error: 'User data not found' };
       }
 
-      return {
+      const result: AuthResult = {
         success: true,
-        user,
-        session: authData.session
+        user
       };
+      
+      if (authData.session) {
+        result.session = {
+          access_token: authData.session.access_token,
+          refresh_token: authData.session.refresh_token,
+          expires_in: authData.session.expires_in || 3600,
+          token_type: 'Bearer'
+        };
+      }
+      
+      return result;
 
     } catch (error) {
       logger.error('Auth service signin error', { error });
@@ -201,11 +208,21 @@ export class AuthService {
         return { success: false, error: 'User data not found' };
       }
 
-      return {
+      const result: AuthResult = {
         success: true,
-        user,
-        session: data.session
+        user
       };
+      
+      if (data.session) {
+        result.session = {
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+          expires_in: data.session.expires_in || 3600,
+          token_type: 'Bearer'
+        };
+      }
+      
+      return result;
 
     } catch (error) {
       logger.error('Auth service refresh error', { error });

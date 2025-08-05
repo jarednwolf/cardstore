@@ -40,6 +40,10 @@
       "dest": "/frontend/auth.html"
     },
     {
+      "src": "/automation.html",
+      "dest": "/frontend/automation.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/frontend/index.html"
     }
